@@ -1,0 +1,345 @@
+\documentclass{report}
+\usepackage[utf8]{inputenc}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{algorithmicx}
+\usepackage[ruled]{algorithm}
+\usepackage[noend]{algpseudocode}
+
+\title{Advanced Algorithms and Datastructures - Full Notes}
+\author{André O. Andersen}
+\date{2021}
+
+\begin{document}
+
+\maketitle
+
+\section*{Max Flow}
+\subsection*{General Knowledge}
+\clearpage
+\subsection*{Proofs}
+\clearpage
+\subsection*{Examples}
+\clearpage
+
+\section*{Linear Programming and Optimization}
+\subsection*{General Knowledge}
+\clearpage
+\subsection*{Proofs}
+\clearpage
+\subsection*{Examples}
+\clearpage
+
+\section*{Hashing}
+\subsection*{General Knowledge}
+\clearpage
+\subsection*{Proofs}
+\clearpage
+\subsection*{Examples}
+\clearpage
+
+\section*{Van Emde Boas Trees}
+\subsection*{General Knowledge}
+\clearpage
+\subsection*{Proofs}
+\clearpage
+\subsection*{Examples}
+\clearpage
+
+\section*{NP-Completeness}
+\subsection*{General Knowledge}
+\clearpage
+\subsection*{Proofs}
+\clearpage
+\subsection*{Examples}
+\clearpage
+
+\section*{Exact Exponential Algorithms and Parameterized Complexity}
+\subsection*{General Knowledge}
+\clearpage
+\subsection*{Proofs}
+\clearpage
+\subsection*{Examples}
+\clearpage
+
+\section*{Approximation Algorithms}
+\subsection*{General Knowledge}
+We have at least three waays to get around NP-completeness. First, if the actual inputs are small, an algorithm with exponential running time may be perfectly satisfactory. Second, we may be able to isolate important special cases that we can solve in polynomial time. Third, we might come up with approaches to find \textit{near-optimal} solutions in polynomial time. We call an algorithm that returns near-optimal solutions an \textit{\textbf{approximation algorithm}}
+\\
+\\
+We say that an algorithm for a problem has an \textit{\textbf{approximation ratio}} of $\rho(n)$ if, for any input of size $n$, the cost $C$ of the solution produced by the algorithm is within a factor of $\rho(n)$ of the cost $C^*$ of an optimal solution
+\begin{equation}
+    \max \left( \frac{C}{C^*}, \frac{C^*}{C} \right) \leq \rho(n).
+\end{equation}
+If an algorithm achieves an approximation ratio of $\rho(n)$, we call it a \textit{\textbf{$\rho(n)$-approximation algorithm}}. The approximation ratio of an approximation algorithm is never less than 1, since $\frac{C}{C^*} \leq 1$ implies $\frac{C^*}{C} \geq 1$. Therefore, a $1$-approximation algorithm produces an optimal solution.
+\\
+\\
+An \textit{\textbf{approximation scheme}} for an optimization problem is an approximation algorithm that takes as input not opnly an instance of the problem, but also a value $\epsilon > 0$ such that for any fixed $\epsilon$, the scheme is a $(1 + \epsilon)$-approximation algorithm. We say that an approximation scheme is a \textit{\textbf{polynomial-time approximation scheme}} if for any fixed $\epsilon > 0$, the scheme runs in time polynomial in the size $n$ of its input instance.
+\\
+\\
+We say that an approximation scheme is a \textit{\textbf{fully polynomial-time approximation scheme}} if it is an approximation scheme and its running time is polynomial in both $\frac{1}{\epsilon}$ and the size $n$ of the input instance. For example, the scheme might have a running time of $O \left( \left( \frac{1}{\epsilon} \right)^2 n^3 \right)$. With such a scheme, any decrease in $\epsilon$ comes with an instace in the running time.
+\\
+\\
+We say that a randomized algorithm for a problem has an \textit{\textbf{approximation ratio}} of $\rho(n)$ if, for any input of size $n$, the expected cost $C$ of the solution procuded by the randomized algorithm is within a factor of $\rho(n)$ of the cost $C^*$ of an optimal solution:
+$$
+\max \left( \frac{C}{C^*}, \frac{C^*}{C} \right) \leq \rho(n).
+$$
+We call a randomized algorithm that achieves an approximation ratio of $\rho(n)$ a \textit{\textbf{randomized $\rho(n)$-approximation algorithm}}
+
+\clearpage
+
+\subsection*{Examples}
+\subsubsection*{The Vertex-cover Problem}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height = 13cm]{entities/fig_35_1.PNG}
+\end{figure}
+\noindent A \textit{\textbf{vertex cover}} of an undirected graph $G = (V, E)$ is a subset $V' \subseteq V$ such that if $(u, v)$ is a nedge of $G$, then either $u \in V'$ or $v \in V'$ (or both). The size of a vertex cover is the number of vertices in it. The \textit{\textbf{vertex-cover problem}} is to find a vertex cover of minimum size in a given undirected graph. We call such a vertex cover an \textit{\textbf{optimal vertex cover}}. 
+\\
+\\
+The approximation algorithm \texttt{APPROX-VERTEX-COVER}($G$) returns a vertex cover whose size is guaranteed to be no more than twice the size of an optimal vertex cover. The running time of this algorithm is $O(V + E)$, using adjacency lists to represent $E'$
+\begin{algorithm}[htbp]
+    \caption{APPROX-VERTEX-COVER}
+    \begin{algorithmic}[1]
+        \Require Undirected graph $G$
+        \State $C = \emptyset$
+        \State $E' = G.E$
+        \While{$E' \neq \emptyset$}
+            \State let $(u, v)$ be an arbitrary edge of $E'$
+            \State $C = C \cup \{u, v\}$
+            \State remove from $E'$ edge $(u, v)$ and every edge incident on either $u$ or $v$
+        \EndWhile
+        \State \textbf{return} $C$
+    \end{algorithmic}
+\end{algorithm}
+
+\subsubsection*{The traveling-salesman problem}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height = 13cm]{entities/fig_35_2.PNG}
+\end{figure}
+In the traveling-salesman problem, we are given a complete undirected graph $G = (V, E)$ that has a nonnegative integer cost $c(u, v)$ associated wit heach edge $(u, v) \in E$, and we must find a hamiltonian cycle of $G$ with minimum cost. As an extension of our notation, let $c(A)$ denote the total cost of the edges in the subset $A \subseteq E$.
+\\
+\\
+We say that the cost function $c$ satisfies the \textit{\textbf{triangle inequality}} if, for all vertices $u, v, w \in V$
+$$c(u, w) \leq c(u, v) + c(v, w).$$
+\\
+\\
+We shall first compute a minimum spanning tree, whose weight gives a lower bound on the le ngth of an optimal traveling-salesman tour. We shall then use the minimum spanning tree to create a tour whose cost is no more than twice that of the minimum spanning tree's weight, as long as the cost function satisfies the triangle inequality. \texttt{APPROX-TSP-TOUR}($G$, $c$) implements this approach with a running time of $\Theta(V^2)$ depending on how a simple implementation of how to compute the minimum spanning tree
+\begin{algorithm}[htbp]
+    \caption{APPROX-TSP-TOUR}
+    \begin{algorithmic}[1]
+        \Require Complete undirected graph
+        \Require Cost function $c$ satisfying the triangle inequality
+        \State select a vertex $r \in G.V$ to be a "root" vertex
+        \State compute a minimum spanning tree $T$ for $G$ from root $r$
+        \State let $H$ be a list of vertices, ordering according to when they are first visited in a preorder tree walk of $T$
+        \State \textbf{return} the hamiltionian cycle $H$
+    \end{algorithmic}
+\end{algorithm}
+
+\subsubsection*{The set-covering problem}
+An instance $(X, F)$ of the \textit{\textbf{set-covering problem}} consists of a finite set $X$ and a family $F$ of subsets of $X$, such that every element of $X$ belongs to at least one subset in $F$. We say that a subet $S \in F$ \textit{\textbf{covers}} its elements. The problem is to find a minimum-size subset $C \subseteq F$ whose members cover all of $X$ (both $F$ and $C$ are thus sets of multiple sets). We say, that any $C$ that cover all of $X$, \textit{\textbf{covers}} $X$.
+\\
+\\
+The greedy method works by picking, at each stage, the set $S$ that covers the greatest number of remaining elements that are uncovered
+\begin{algorithm}[htbp]
+    \caption{GREEDY-SET-COVER}
+    \begin{algorithmic}[1]
+        \Require A finite set $X$
+        \Require A family $F$ of subsets of $X$
+        \State $U = X$
+        \State $C = \emptyset$
+        \While{$U \neq \emptyset$}
+            \State Select an $S \in F$ that maximizes $|S \cap U|$
+            \State $U = U - S$
+            \State $C = C \cup \{S\}$
+        \EndWhile
+        \State \textbf{return} $C$
+    \end{algorithmic}
+\end{algorithm}
+We can easily implement the algorithm to run in time polynomial in $|X|$ and $|F|$. Since the number of iterations of the loop is bounded from above by $\min \left(|X|, |F| \right)$, and we can implement the loop body to run in time $O(|X||F|)$, a simple implementation runs in time $O(|X||F| \min(|X|, |F|))$.
+
+\subsubsection*{MAX-3-CNF satisfiability}
+A particular instance of 3-CNF satisfiability may or may not be satisfiable. In order to be satisfiable, there must exist an assignment of the variables so that every clause evaluates to $1$. If an instance is not satisfiable, we may want to compute how "close" to satisfiable it is, that is, we may wish to find an assignment of the variables that satisfies as many clauses as possible. We call the resulting maximization problem \textbf{\textit{MAX-3-CNF satisfiability}}. The input to MAX-3-CNF satisfiability is the same as for 3-CNF satisfiability, and the goal is to return an assignment of the variables that maximizes the number of clauses evaluating to 1. We require each clause to consist of exactly three distinct literals. We further assume that no clause contains both a variable and its negation.
+
+\subsection*{Vertex cover using linear programming}
+In the \textit{\textbf{minimum-weight vertex-cover problem}}, we are given an undirected graph $G = (V, E)$ in which each vertex $v \in V$ has an associated positive weight $w(v)$. for any vertex cover $V' \subseteq V$, we define the weight of the vertex cover $w(V') = \sum_{v \in V'} w(v)$. The goal is to find a vertex cover of minimum weight. We shall compute a lower bound on the weight of the minimum-weight vertex cover, by using a linear program. We shall then "round" this solution and use it to obtain a vertex cover.
+\\
+\\
+Suppose, that we associate a variable $x(v)$ with each vertex $v \in V$, and let us require that $0 \leq x(v) \leq 1$ for each $v \in V$. We put $v$ into the vertex cover iff $x(v) \geq 1/2$. Then, we can write the constraint that for any edge $(u, v)$, at least one of $u$ and $v$ must be in the vertex cover as $x(u) + x(v) \geq 1$. This view gives rise to the \textit{\textbf{linear-programming relaxation}} for finding a minimum-weight vertex cover
+\begin{figure}
+    \centering
+    \includegraphics[width = 9 cm]{entities/LP_relaxation.PNG}
+\end{figure}
+The procedure \texttt{APPROX-MIN-WEIGHT-VC}($G$, $w$) uses the solution to the linear-programming relaxation to construct an approximate solution to the minimum-weight vertex-cover problem
+\begin{algorithm}
+    \centering
+    \caption{APPROX-MIN-WEIGHT-VC}
+    \begin{algorithmic}[1]
+        \Require Undirected graph $G = (V, E)$
+        \Require Positive weight function $w(v)$ for each $v \in V$
+        \State $C = \emptyset$
+        \State Compute $\bar{x}$, an optimal solution to the lienar program 
+        \For{each $v \in V$}
+            \If{$\bar{x}(v) \geq 1/2$}
+                $ C = C \cup \{v\}$
+            \EndIf
+        \EndFor
+        \State \textbf{return} C
+    \end{algorithmic}
+\end{algorithm}
+
+\clearpage
+
+\subsection*{Proofs}
+\subsubsection*{Theorem 35.1}
+\texttt{APPROX-VERTEX-COVER} is a polynomial-time 2-approximation algorithm
+\\
+\\
+\textit{\textbf{Proof}} It has been shown in a previous chapter, that it runs in polynomial time. \\
+The set $C$ of vertices that is returned by the algorithm is a vertex cover, since the laogrithm loops until every edge in $g.E$ has been covered by some vertex in $C$. \\
+Let $A$ denote the set of edges that line $4$ picked. Not two edges in $A$ share an endpoint. Thus no two edges in $A$ are covered by the same vertex from an optimal cover $C^*$, and we have the lower bound
+\begin{equation}
+    \label{eqn:vertex_cover_optimal_lower_bound}
+    |C^*| \geq |A|
+\end{equation}
+on the size of an optimal vertex cover. Since $A$ consists of the edges between two vertices in $C$ (and since all of the elements in $C$ are unique), we have the (exact) upper bound on the size of the vertex cover returned
+\begin{equation}
+    \label{eqn:vertex_cover_returned_upper_bound}
+    |C| = 2|A|
+\end{equation}
+Combining equation (\ref{eqn:vertex_cover_optimal_lower_bound}) and (\ref{eqn:vertex_cover_returned_upper_bound}), we obtain
+$$|C| = 2|A| \leq 2|C^*|$$
+\subsection*{Theorem 35.2}
+\texttt{APPROX-TSP-TOUR} is a polynomial-time 2-approximation algorithm for the traveling-salesman problem with the triangle inequality
+\\
+\\
+\textit{\textbf{Proof}} It has been shown in a previous chapter, that it runs in polynomial time. \\
+Let $H^*$ denote an optimal tour for the given set of vertices. We obtain a spanning tree by deleting any edge fro ma tour, and each edge cost is nonnegative. Therefore, the weight of the minimum spanning tree $T$ provides a lower bound on the cost of an optimal tour
+\begin{equation}
+    \label{eqn:35.4}
+    c(T) \leq c(H^*).
+\end{equation}
+A \textit{\textbf{full walk}} of $T$ lists the vertices when they are first visited and also whenever they are returned to after a visit to a subtree. Let us call this full walk $W$. Since the full walk traverses every edge of $T$ exactly twice, we have 
+\begin{equation}
+    \label{eqn:35.5}
+    c(W) = 2c(T)
+\end{equation}
+Inequality (\ref{eqn:35.4}) and equation (\ref{eqn:35.5}) imply that
+\begin{equation}
+    \label{eqn:35.6}
+    c(W) \leq 2c(H^*)
+\end{equation}
+and so the cost of $W$ is within a factor of 2 of the cost of an optimal tour. \\
+Unfortunately, the full walk $W$ is generally not a tour, since it visits some vertices more than once. By the triangle inequality, however, we can delete a visit to any vertex from $W$ and the cost does not increase (If we delete a vertex $v$ from $W$ between visits to $u$ and $w$, the resulting ordering specifies going directly from $u$ to $w$). By repeatedly applying this operation, we can remove from $W$ all but the first visit to each vertex. This ordering is the same as that obtained by a preorder walk of the tree $T$. Let $H$ be the cycle corresponding to this preorder walk. It is a hamiltonian cycle, since every vertex is visited exacly once, and in fact it is the cycle computed by the algorithm. Since $H$ is obtained by deleting vertices from the full walk $W$, we have
+\begin{equation}
+    \label{eqn:35.7}
+    c(H) \leq c(W).
+\end{equation}
+Combining inequalities (\ref{eqn:35.6}) and (\ref{eqn:35.7}) gives $c(H) \leq 2c(H^*)$, which completes the proof.
+
+\subsubsection*{Theorem 35.4}
+\texttt{GREEDY-SET-COVER} is a polynomial-time $\rho(n)$-approximation algorithm, where
+$$\rho(n) = H(\max\{|S| : S \in F\})$$
+and $H(d) = \sum_{i = 1} ^d 1/i$ is the $d$th harmonic number.
+\\
+\\
+\textit{\textbf{Proof}} It has been shown in a previous chapter, that it runs in polynomial time. \\
+To show that the algorithm is a $\rho(n)$-approximation algorithm, we assign a cost of $1$ to each set selected by the algorithm, distribute this cost over the elements covered for the first time, and then use these costs to derive the desired relationship between the size of an optimal set cover $C^*$ and the size of the set cover $C$ returned by the algorithm. Let $S_i$ denote the $i$th subset selected by the algorithm. The algorithm incurs a cost of $1$ when it adds $S_i$ to $C$. We spread this cost of selection $S_i$ evenly among the elements covered for the first time by $S_i$. Let $c_x$ denote the cost allocated to element $x$, for each $x \in X$. Each element is assigned a cost only once, when it is covered for the first time. If $x$ is covered for the first time by $S_i$, then
+$$c_x = \frac{1}{|S_i - (S_i \cup S_2 \cup ... \cup S_{i - 1}|}.$$
+Each step of the algorithm assigns $1$ unit of cost, and so
+\begin{equation}
+    \label{eqn:35.9}
+    |C| = \sum_{x \in X} c_x.
+\end{equation}
+Each element $x \in X$ is in at least one set in the optimal cover $C^*$, and so we have $\sum_{S \in C^*} \sum_{x \in S} c_x \geq \sum_{x \in X} c_x$. Combining equation (\ref{35.9}) and inequalitiy (\ref{35.10}), we have that
+\begin{equation}
+    \label{eqn:35.11}
+    |C| \leq \sum_{s \in C^*} \sum_{x \in S} c_x.
+\end{equation}
+The remainder of the proof rests on the following key inequality, which we shall prove shortly. For any set $S$ belonging to the family $F$
+\begin{equation}
+    \label{eqn:35.12}
+    \sum_{x \in S} c_x \leq H(|S|).
+\end{equation}
+From inequalities (\ref{35.11}) and (\ref{35.12}) it follows that
+$$|C| \leq \sum_{S \in C^*} H(|S|) \leq |C^*| \cdot H(\max\{|S| : S \in F\}),$$
+thus proving the theorem. \\
+All that remains is to pro ve inequality (\ref{eqn:35.12}). Consider any set $S \in F$ and any $i = 1, 2, ..., |C|$, and let $u_i =|S - (S_1 \cup S_2 \cup ... \cup S_i)$ be the number of elements in $S$ that remain uncovered after the algorithm has selected sets $S_1, S_2, ..., S_i$. We define $u_0 = |S|$ to be the number of elements of $S$, which are all initially uncovered. Let $K$ be the least index such that $u_k = 0$, so that every element in $S$ is uncovered by at least one of the sets $S_1, S_2, ..., S_k$ and some element in $S$ is uncovered by $S_1 \cup S_2 \cup ... \cup S_{k - 1}$. Then, $u_{i - 1} \geq u_i$, and $u_{i - 1} - u_i$ elements of $S$ are covered for the first time by $S_i$, for $i = 1, 2, ..., k$. Thus,
+$$
+\sum_{x \in S} c_x = \sum_{i = 1} ^k (u_{i - 1} - u_i) \cdot \frac{1}{|S_i - (S_i \cup S_2 \cup ... \cup S_{i - 1})|}.
+$$
+Observe that
+$$
+|S_i - (S_1 \cup S_2 \cup ... \cup S_{i - 1}) \geq |S - (S_1 \cup S_2 \cup ... \cup S_{i - 1}| = u_{i - 1},
+$$
+because the greedy choice of $S_i$ guarantees that $S$ cannot cover more new elements than $S_i$ does. Consequently, we obtain
+$$
+\sum_{x \in S} c_x \leq \sum_{i = 1} ^k (u_{i - 1} - u_i) \cdot \frac{1}{u_{i - 1}}.
+$$
+We now bound this quantitiy as follows
+$$
+\sum_{x \in S} c_x \leq \sum_{i = 1} ^k (u_{i - 1} - u_i) \frac{1}{u_{i - 1}}
+$$
+$$= \sum_{i = 1} ^k \sum_{j = u_i + 1} ^{u_i - 1} \frac{1}{u_{u_i - 1}}$$
+$$\leq \sum_{i = 1} ^k \sum_{j = u_i + 1} ^{u_i - 1} \frac{1}{j} \quad \text{(because } j \leq u_{u_i - 1} \text{ )}$$
+$$= \sum_{i = 1} ^k (H(u_{i - 1}) - H(u_i))$$
+$$= H(u_0) - H(u_k) \quad \text{(because the sum telescopes)}$$
+$$= H(u_0) - H(0)$$
+$$= H(u_0) \quad \text{(because } H(0) = 0 \text{)}$$
+$$= H(|S|)$$
+which completes the proof of inequalities (\ref{eqn:35.12}).
+
+\subsubsection*{Corollary 35.5}
+\texttt{GREEDY-SET-COVER} is a polynomial-time $(\ln |X| + 1)$-approximation algorithm.
+\\
+\\
+\textit{\textbf{Proof}} Use inequality (A.14) and Theorem Theorem 35.4
+
+\subsubsection*{Theorem 35.6}
+Given an instance of MAX-3-CNF satisfiability with $n$ variables $x_1, x_2, ..., x_n$ and $m$ clauses, the randomized algorithm that independently sets each variable to 1 with probability $1/2$ and to 0 with probability $1/2$ is a randomized $8/7$-approximation algorithm.
+\\
+\\
+\textit{\textbf{proof}} Suppose that we have independently set each variable to $1$ with probability $1/2$ and to 0 with probability $1/2$. For $i = 1, 2, ..., m$, we define the indicator random variable
+$$Y_i = I\{\text{clause } i \text{ is satisfied}\}$$
+so that $Y_i = 1$ as long as we have set at least one of the literals in the $i$th clause to $1$. Since no literal appears more than once in the same clause, and since we have assumed that no variable and its negation appear in the smae clause, the settings of the three literals in each clause are independent. A clause is not satisfied only if all three of its literals are set to $0$, and so $Pr\{\text{clause } i \text{ is not satisfied}\} = (1/2)^3 = 1/8$. Thus, we have $Pr\{\text{clause } i \text{ is satisfied}\} = 1 - 1/8 = 7/8$, and $E[Y_i] = 7/8$. Let $Y$ be the number of satisfied clauses overall, so that $Y= Y_1 + Y_2 + ... + Y_m$. Then, we have
+$$E[Y] = E \left[ \sum_{i = 1} ^m Y_i \right] = \sum_{i = 1} ^m E[Y_i] = \sum_{i=1} ^m 7/8 = 7m/8$$.
+Clearly, $m$ is an upper bound on the number of satisfied clauses, and thence the approximation ratio is at most $m/(7m/8) = 8/7$.
+
+\subsubsection*{Theorem 35.7}
+Algorithm \texttt{APPROX-MIN-WEIGHT-VC} is a polynomial-time 2-approximation algorithm for the minimum-weight vertex-cover problem.
+\\
+\\
+\textit{\textbf{Proof}} Because there is a polynomial-time algorithm to solve the lienar program in line 2, and because the for-loop runs in polynomial time, the algorithm is a polynomial-time algorithm. \\
+Nowe we show that the algorithm is a 2-approximation algorithm. Let $C^*$ be an optimal solution to the minimum-weight vertex-cover problem, and let $z^*$ be the value of an optimal solution to the linear program. Since an optimal vertex cover is a feasible solution to thel inear program, $z^*$ must be a lower bound on $w(C^*)$, that is,
+\begin{equation}
+    \label{eqn:35.21}
+    z^* \leq w(C^*).
+\end{equation}
+Next, we claim that by rounding the fractional values of the variables $\bar{x}(v)$, we produce a set $C$ that is a vertex cover and satisfies $w(C) \leq 2z^*$. To see that $C$ is a vertex cover, consider any edge $(, v) \in E$. By the first constraint, we know that $x(u) + x(v) \geq 1$, which implies that at least one of $\bar{x}(u)$ and $\bar{x}(v)$ is at least $1/2$. Therefore, at least one of $u$ and $v$ is included in the vertex cover, and so every edgge is covered. \\
+Now, we consider the weight of the cover. We have
+$$
+z^* = \sum_{v \in V} w(v) \bar{x}(v) \geq \sum_{v \in V: \bar{x} \geq 1/2} w(v) \bar{x}(v) \geq \sum_{v \in V: \bar{x}(v) \geq 1/2} w(v) \cdot \frac{1}{2} = \sum_{v \in C} w(v) \cdot \frac{1}{2} = \frac{1}{2} \sum_{v \in C} w(v) = \frac{1}{2}w(C)
+$$
+\begin{equation}
+    \label{eqn:35.22}
+    = \frac{1}{2}w(C).
+\end{equation}
+Combining inequalities (\ref{eqn:35.21}) and (\ref{eqn:35.22}) gives
+$$w(C) \leq 2z^* \leq 2w(C^*)$$
+and hence \texttt{APPROX-MIN-WEIGHT-VC} is a 2-approximation algorithm.
+
+\clearpage
+
+\section*{Polygon Triangulation}
+\subsection*{General Knowledge}
+\clearpage
+\subsection*{Proofs}
+\clearpage
+\subsection*{Examples}
+\clearpage
+
+\end{document}
