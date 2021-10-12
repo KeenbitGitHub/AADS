@@ -2,6 +2,9 @@
 \usepackage[utf8]{inputenc}
 \usepackage{amssymb}
 \usepackage{amsmath}
+\usepackage{algorithmicx}
+\usepackage[ruled]{algorithm}
+\usepackage[noend]{algpseudocode}
 
 \usepackage{graphicx}
 
@@ -18,15 +21,17 @@
 \clearpage
 \subsection*{Presentation}
 \clearpage
-\subsection*{Short notes}
-\clearpage
 
 \section*{Linear Programming and Optimization}
 \subsection*{Disposition}
 \clearpage
 \subsection*{Presentation}
 \clearpage
-\subsection*{Short notes}
+
+\section*{Randomized Algorithms}
+\subsection*{Disposition}
+\clearpage
+\subsection*{Presentation}
 \clearpage
 
 \section*{Hashing}
@@ -34,15 +39,11 @@
 \clearpage
 \subsection*{Presentation}
 \clearpage
-\subsection*{Short notes}
-\clearpage
 
 \section*{Van Emde Boas Trees}
 \subsection*{Disposition}
 \clearpage
 \subsection*{Presentation}
-\clearpage
-\subsection*{Short notes}
 \clearpage
 
 \section*{NP-Completeness}
@@ -50,15 +51,11 @@
 \clearpage
 \subsection*{Presentation}
 \clearpage
-\subsection*{Short notes}
-\clearpage
 
 \section*{Exact Exponential Algorithms and Parameterized Complexity}
 \subsection*{Disposition}
 \clearpage
 \subsection*{Presentation}
-\clearpage
-\subsection*{Short notes}
 \clearpage
 
 \section*{Approximation Algorithms}
@@ -78,19 +75,67 @@
     \end{enumerate}
 \end{enumerate}
 
-
 \clearpage
 \subsection*{Presentation}
-\clearpage
-\subsection*{Short notes}
+\textbf{Definition of \textit{approximation ratio}} \\
+We say that an algorithm for a problem has an \textit{\textbf{approximation ratio}} of $\rho(n)$ if, for any input of size $n$, the cost $C$ of the solution produced by the algorithm is within a factor of $\rho(n)$ of the cost $C^*$ of an optimal solution
+$$
+\max \left( \frac{C}{C^*}, \frac{C^*}{C} \right) \leq \rho(n).
+$$
+\textbf{Definition of \textit{$\rho(n)$-approximation algorithm}} \\
+If an algorithm achieves an approximation ratio of $\rho(n)$, we call it a \textit{\textbf{$\rho(n)$-approximation algorithm}}.
+\\
+\\
+\textbf{Definition of \textit{randomized} $\rho(n)$\textit{-approximation algorithm}} \\
+We say that a randomized algorithm for a problem has an \textit{\textbf{approximation ratio}} of $\rho(n)$ if, for any input of size $n$, the expected cost $C$ of the solution procuded by the randomized algorithm is within a factor of $\rho(n)$ of the cost $C^*$ of an optimal solution:
+$$
+\max \left( \frac{C}{C^*}, \frac{C^*}{C} \right) \leq \rho(n).
+$$
+We call a randomized algorithm that achieves an approximation ratio of $\rho(n)$ a \textit{\textbf{randomized $\rho(n)$-approximation algorithm}}
+\\
+\\
+\textbf{Introduction to \textit{vertex cover}} \\
+\noindent A \textit{\textbf{vertex cover}} of an undirected graph $G = (V, E)$ is a subset $V' \subseteq V$ such that if $(u, v)$ is an edge of $G$, then either $u \in V'$ or $v \in V'$ (or both). The size of a vertex cover is the number of vertices in it. The \textit{\textbf{vertex-cover problem}} is to find a vertex cover of minimum size in a given undirected graph. We call such a vertex cover an \textit{\textbf{optimal vertex cover}}. 
+\\
+\\
+\noindent The set $C$ of vertices that is returned by \texttt{APPROX-VERTEX-COVER} is a vertex cover, since the laogrithm loops until every edge in $G.E$ has been covered by some vertex in $C$.
+\begin{algorithm}[htbp]
+    \caption{APPROX-VERTEX-COVER}
+    \begin{algorithmic}[1]
+        \Require Undirected graph $G$
+        \State $C = \emptyset$
+        \State $E' = G.E$
+        \While{$E' \neq \emptyset$}
+            \State let $(u, v)$ be an arbitrary edge of $E'$
+            \State $C = C \cup \{u, v\}$
+            \State remove from $E'$ edge $(u, v)$ and every edge incident on either $u$ or $v$
+        \EndWhile
+        \State \textbf{return} $C$
+    \end{algorithmic}
+\end{algorithm}
+
+\noindent \textbf{Proof that \texttt{APPROX-VERTEX-COVER} is a 2-approximation algorithm} \\
+Let $A$ denote the set of edges that line $4$ picked. Not two edges in $A$ share an endpoint. Thus no two edges in $A$ are covered by the same vertex from an optimal cover $C^*$, and we have the lower bound
+\begin{equation}
+    \label{eqn:vertex_cover_optimal_lower_bound}
+    |C^*| \geq |A|
+\end{equation}
+on the size of an optimal vertex cover. Since $A$ consists of the edges between two vertices in $C$ (and since all of the elements in $C$ are unique), we have the (exact) upper bound on the size of the vertex cover returned
+\begin{equation}
+    \label{eqn:vertex_cover_returned_upper_bound}
+    |C| = 2|A|
+\end{equation}
+Combining equation (\ref{eqn:vertex_cover_optimal_lower_bound}) and (\ref{eqn:vertex_cover_returned_upper_bound}), we obtain
+$$|C| = 2|A| \leq 2|C^*|$$
+
+% MANGLER INTRODUCTION, MAX-3-CNF OG MÅSKE ET KORT EKSEMPEL PÅ ET VERTEX COVER
+
 \clearpage
 
 \section*{Polygon Triangulation}
 \subsection*{Disposition}
 \clearpage
 \subsection*{Presentation}
-\clearpage
-\subsection*{Short notes}
 \clearpage
 
 \end{document}
