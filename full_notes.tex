@@ -336,10 +336,135 @@ and hence \texttt{APPROX-MIN-WEIGHT-VC} is a 2-approximation algorithm.
 
 \section*{Polygon Triangulation}
 \subsection*{General Knowledge}
+This topic is about the \textit{Art Gallary problem}; how many caomeras do we need to guard a given gallary and how do we decide to place them? We model a gallary as a polygonal region in the plane. We further restrict ourselves to geions that are \textit{simple polygons} (that is, a polygon of a single chain that does not intersect itself). 
+\\
+\\
+Let $\mathcal{P}$ be a simple polygon with $n$ vertices. Because $\mathcal{P}$ may be a complicated shape, it seems difficult to say anything about the number of cameras we need to guard $\mathcal{P}$. Hence, we first decompose $\mathcal{P}$ into pieces that are easy to guard, namely triangles. We do this by drawing diagonals between pair of vertices.
+\\
+\\
+A decomposition of a polygon into triangles by a maximal set of non-intersecting diagonals is called a \textit{triangulation} of the polygon. We require that the set of non-intersecting diagonals to be maximal to ensure that no triangle has a polygon vertex in the interior of one of its edges. We can thus guard $\mathcal{P}$ by placing a camera in every triangle of a triangulation $T_\mathcal{P}$ of $\mathcal{P}$.
+\\
+\\
+Placing cameras at vertices seems better, because a vertex can be incident to many triangles, and a camera at that vertex guards all of them. This suggest the following approach: let $T_\mathcal{P}$ be a triangulation of $\mathcal{P}$. Select a subset of the vertices of $\mathcal{P}$, such that any triangle in $T_\mathcal{P}$ has at least one selected vertex, and place the cameras at the selected vertices.
+\\
+\\
+To find such a subset we assign each vertex of $\mathcal{P}$ a color: white, grey or black. The coloring will be such that any vertices connected by an edge or a diagonal have different colors. this is called a \textit{3-coloring} of a triangulated polygon. In a 3-coloring of a triangulated polygon, every triangle has a white, black and gray vertex. Hence, if we place cameras at all gray vertics, say, we have guarded the whole polygon. By choosing the smallest color class to place the cameras, we guard $\mathcal{P}$ using at most $\left \lfloor \frac{n}{3} \right \rfloor$ cameras.
+\\
+\\
+Let $P$ be a simple polygon with $n$ vertices. A set of $\left \lfloor \frac{n}{3} \right \rfloor$ camera position in The 3-coloring approach is optimal in worst case such that any point inside The 3-coloring approach is optimal in worst case is visible from at least one of the cameras can be computed in $O(n \log n)$ time.
+\\
+The previous triangulation algorithm will take quadratic time in worst case. This can be improved for some classes of polygons. For instance, convext polygons: Pick one vertex and draw diagonals from every other vertex, that is nto a neighbor, to the vertex. This runs in linear time. Thus, a possible solution would be to decompose The 3-coloring approach is optimal in worst case into convext pieces and then triangulate the pieces. However, it is difficult to partition a polygon into convex pieces. Therefore, we shall decompose The 3-coloring approach is optimal in worst case into \textit{monotone pieces}, which is a lot easier.
+\\
+\\
+A simple polygon is called \textit{monotone with respect to a line} $L$ if for any line $L'$ perpendicular to $L$, the intersection of the polygon with $L'$ is connected. A polygon that is monotone with respect to the y-axis is called \textit{y-monotone}. The following property is characteristic for y-monotone polygons: if we walk from
+a topmost to a bottommost vertex along the left (or the right) boundary chain, then we always move downwards or horizontally, never upwards.
+\\
+\\
+Our strategy to triangulate the polygon $\mathcal{P}$ is to first partition $\mathcal{P}$ into y-monotone pieces, and then triangulate the pieces. We can partition a polygon into monotone pieces as follows. imagine walking from the topmost vertex of $\mathcal{P}$ to the bottommost vertex on either boundary chain. A vertex where the direction in which we walk switches from downward to upward or from upward to downward is called a \textit{turn vertex}. To partition $\mathcal{P}$ into y-monotone pieces, we need to remove the turn vertices, which is done by adding diagonals. If at a turn vertex $v$ both incident edges go down and the interior of the polygon lies above $v$, then we must choose a diagonal that goes up from $v$. $v$ cannot be a turn vertex in either of the two resulting subpolygons. If both incident edges of a turn vertex go up and the interior lies bellow it, we have to choose a diagonal that goes down.
+\\
+\\
+We distinguish five types of vertex in $P$. Four of these types are turn vertices: \textit{Start vertices}, \textit{Split vertices}, \textit{End vertices}, and \textit{merge vertices}. They are defined as follows. A vertex is a start vertex if its two neighbors lie below it and the interior angle at $v$ is less than $\pi$. If the interior angle is greater than $\pi$ then $v$ is a split vertex. A vertex is an end vertex if its two neighbors lie above it and the interior angle at $v$ is less than $\pi$. If the interior angle is greater than $\pi$ then $v$ is a merge vertex. The vertices that are not turn vertices are \textit{regular vertices}. Thus a regular vertex has one of its neighbors above it and the other neighbor below it.
+\\
+\\
+\textit{Lemma 3.4} implies, that $\mathcal{P}$ has been partitioned into y-monotone pieces once we get rid of its split and merge vertices. We do this by adding a diagonal going upward from each split vertex and downward from each merge vertex. Once done, $\mathcal{P}$ has been split into y-monotone pieces.
+\\
+\\
+Let's see how we can add the diagonals for the split vertices. Let $v_1, v_2, ..., v_n$ be a counterclock enumeration of the vertces of $\mathcal{P}$. Let $e_1, ..., e_n$ be the set of edges of $\mathcal{P}$ , where $e_i = \overline{v_i v_{i+1}}$ for $1 \leq i < n$ and $e_n = \overline{v_n v_1}$.
+\\
+\\
+The algorithm moves a line $L$ downward over the plane. The line halts at certain event points; in our case the vertices of $\mathcal{P}$. The event points are stored in an event queue $Q$. The event queue is a priority queue, where the priority of a vertex is its y-coordinate. This way the next event to be handled can be found in $O(\log n)$ time. The goal of the sweep is to add diagonals from each split vertex to a vertex lying above it. Let $e_j$ be the dge immediately to the left of $v_i$ on the sweep line, and let $e_k$ be the edge immediately to the right of $v_i$ on the sweep line. Then we can always conenct $v_i$ to the lowest vertex in between $e_j$ and $e_k$, and above $v_i$. If there is no such vertex then we can connect $v_i$ to the upper endpoint of $e_j$ or to the upper endpoint of $_k$. This vertex is called the \textit{helper} of $e_j$ and is denoted by $helper(e_j)$. Formally, $helper(ej)$ is defined as the lowest vertex above the sweepline such that the horizontal segment connecting the vertex to $e_j$ lies inside $\mathcal{P}$
+\\
+\\
+Nowe we know how to get rid of split vertices. What about merge vertices. Suppose the sweep line reaches a merge vertex $v_i$. let $e_j$ and $e_k$ be the edge simmediately to the right and left of $v_i$ on the sweepline. Observe that $v_i$ becomes the new helper of $e_j$ when we reach it. We would like to connect $v_i$ to the highest vertex below the sweep line in between $e_j$ and $e_k$. We do not know the highest vertex below the sweep line when we reach $v_i$. But it is easy to find later on: when we reacj a vertex $v_m$, that replaces $v_i$ as the hlper of $e_j$, then this is the vertex we are looking for. So whenever we replace the hlper of some edge, we check whether the old helper is amerge vertex and, if so, we add the diagonal between the old helper and the new one. This diagonal is always added when the new helper is a split vertex, to get rid of the split vertex. It can also happen that the hlper of $e_j$ is not replaced anymore below $v_i$. In this case we can connect $v_i$ to the lower endpoint of $e_j$.
+\\
+\\
+In the above approach, we need to ifnd the dge to the left of each vertex. Therefore we store the edges of $\mathcal{P}$  intersecting the sweep line in the leaves of a dynamic binary search tree $T$. The left-to-right order of the leaves of $T$ corresponds to the left-to-right order of the edges. Because we are only interested in edges to the left of split and merge vertices we only need to store edges in $T$ that have the interior of $P$ to the right. With each edge in $T$ store its helper. The tree $T$ and the helpers stored with the edges form the status of the sweep line algorithms.
+\\
+\\
+The algorithm partitions $\mathcal{P}$ into subpolygons that have to be processed in a later stage. To have easy access to these subpolygons we shall store the subdivision induced by $\mathcal{P}$  and the added diagonals in a doubly-connected edge-list $D$. We assume $P$ is initially specified as a doubly-connected edge-list. The diagonals outputed for the split and merge vertices are added to the doubly-connected edge-list. To access the doubly-connected edge-list we use cross-pointer between the edges in the status structure and the corresponding edges in the doubly-connected edge-list. Adding a diagonal can then be done in constant time.
+\\
+\\
+Running time: Constructing $Q$ takes linear time and initializing $T$ takes constant time. To handle an event during the sweep we perform one operation on $Q$, at most one query, one insertion, and one deletion on $T$, and we insert at most two diagonals into $D$. Priority queues and balanced search trees allow for queries and updates in $O(\log n)$ time, and an insert into $D$ takes $O(1)$ time. Hence, handling and event takes $O(\log n)$ time, and the algorithm runs in $O(n \log n)$ time.
+\\
+\\
+In the following we show, that monotone polygons can be triangulated in linear time. Together with the partition into monotone pieces in $O(n \log n)$ time, this implies that any simple polygon can be triangulated in $O(n \log n)$ time.
+\\
+\\
+Let $\mathcal{P}$ be an y-monotone polygon with $n$ vertices. We assume that $\mathcal{P}$  is \textit{strictly y-monotone}, that is, it does not contain horizontal edges. 
+\\
+\\
+This property is what makes triangulation a monotone polygon easy: we can work our way through $\mathcal{P}$  from top to the bottom on both chains, adding diagonals whenever this is possible.
+\\
+\\
+The triangulation algorithm handles the vertices in order of decreasing y-coordinate. The algorithm requires a stack $S$ as auxilary data structure. Initially the stack is empty; later it contains the vertices of $P$ that have been encountered but may still need more diagonals. When we handle a vertex we add as many diagonals from this vertex to vertices on the stack as possible. These diagonals split off triangles from $\mathcal{P}$. The vertices that have been handled but not split off - the vertices on the stack - are on the boundary of the part of $\mathcal{P}$  that still needs to be triangulated. The lower the vertex (that is, the more recently it has been encountered), the higher on the stack it is. The part of $\mathcal{P}$  that still needs to be triangulated has a particular shape: it looks like an upside down funnel. One boundary of the funnel consists of a part of a single edge of $\mathcal{P}$ , and the other boundary consists of reflex vertices (interior angle is atleast $180^o$). Only the highest vertex (which is at the bottom of the stack) is convex. This property remains true after, we have handled the next vertex, hence, it is an invariant of the algorithm.
+\\
+\\
+Ket's see which diagonals we can add when we handle the next vertex. We distinguish two cases: $v_j$, the next vertex to handle, lies on the same chain as the reflex vertices on the stack, or it lies on the opposite chain
+\begin{enumerate}
+    \item If $v_j$ lies on the opposite chain, it must be the funnel. We can add diagonals from $v_j$ to all vertices correctly on the stack, except for the last one; this is the upper vertex, so it is already connected to $v_j$. All the vertices are popped from the stack $v_j$ and the vertex previously on top of the stack are pushed onto the stack
+    \item The other case is when $v_j$ is on the same chain as the reflex vertices on the stack. First, pop one vertex from the stack; this vertex is already connected to $v_j$ by an edge of $\mathcal{P}$. Next, pop vertex from the stack and connect them to $v_j$ untill we encounter one where this is not possible. When we find a vertex where we cannot connect $v_j$, we push the last vertex that has been popped back onto the stack. After this has been done we push $v_j$ onto the stack
+\end{enumerate}
+What is the running time of this algorithm? Linear - see pseudocode.
+
 \clearpage
 \subsection*{Proofs}
-\clearpage
-\subsection*{Examples}
+\subsubsection*{Theorem 3.1}
+Every simple polygon admits a triangulation and any triangulation of a simple polygon with $n$ vertices consists of exactly $n-2$ triangles.
+\\
+\\
+\textbf{\textit{Proof}} \\
+We prove this theorem by inducting on $n$. When $n = 3$ the polygon itself is a triangle and the theorem is trivially true. Let $n > 3$ and assume that the theorem is true for all $m < n$. Let $\mathcal{P}$ be a polygon with $n$ vertices
+\\
+\\
+We first prove the existence of a diagonal in $\mathcal{P}$. Let $v$ be the leftmost vertex of $\mathcal{P}$. Let $u$ and $w$ be the two neighboring vertices of $v$ on the boundary of $\mathcal{P}$. If the open segment $\overline{uw}$ lies in the interior of $\mathcal{P}$, we have found a diagonal. Otherwise, there are one or more vertices inside the triangle defined by $u, v$ and $w$, or on the diagonal $\overline{uw}$. Of those vertices, let $v'$ be the one furthest from the line through $u$ and $w$. The segment connecting $v'$ and $v$ cannot intersect an edge of $\mathcal{P}$, because such an edge would have an endpoint inside the triangle that is farther from the line through $u$ and $w$, contradicting the definition of $v'$. Hence, $\overline{vv'}$ is a diagonal.
+\\
+\\
+Any diagonal cuts $\mathcal{P}$ into two simple subpolygons $\mathcal{P}_1$ and $\mathcal{P}_2$. Let $m_1$ be the number of vertices in $\mathcal{P}_1$ and $m_2$ be the number of vertices in $\mathcal{P}_2$. both $m_1$ and $m_2$ must be smaller than $n$, so by induction $\mathcal{P}_1$ and $\mathcal{P}_2$ can be triangulated. Hence, $\mathcal{P}$ can be triangulated as well.
+\\
+\\
+It remains to prove that any triangulation of $\mathcal{P}$ consists of $n-2$ triangles. Consider an arbitrary diagonal in some triangulation $T_\mathcal{P}$. This diagonal cuts $\mathcal{P}$ into two subpolygons with $m_1$ and $m_2$ vertices, respectively. Every vertex of $\mathcal{P}$ occurs in exactly one of the two subpolygons, except the vertices defining the diagonal, which occurs in both. Hence, $m_1 + m_2 = n + 2$. By induction, any triangulation of $\mathcal{P}_i$ consists of $m_i - 2$ triangles, which implie sthat $\mathcal{P}$ consists of $(m_1 - 2) + (m_2 - 2) = n - 2$ triangles.
+
+\subsubsection*{Theorem 3.2}
+The 3-coloring approach is optimal in worst case.
+\\
+\\
+\textbf{\textit{Proof}}
+A 3-coloring always exists. To see this, we look at the \textit{dual graph} of $T_\mathcal{P}$. This graph $g(T_\mathcal{P})$ has a node for every triangle $T_\mathcal{P}$. We denote the triangle corresponding to a node $v$ by $t(v)$. There is an arc between two nodes $v$ and $\mu$ if $t(v)$ and $t(\mu)$ share a diagonal. the arcs in $g(T_\mathcal{P})$ correspond to diagonals in $T_\mathcal{P}$. Because any diagonal cuts $\mathcal{P}$ into two, the removal of an edge from $g(T_\mathcal{P})$ splits the graph into two. Hence, $g(T_\mathcal{P})$ is a tree. This means that we can find a 3-coloring using a simple graph traversal, such as depth first search.
+\\
+\\
+While we do the depth first search, we maintain the following invariant
+\begin{enumerate}
+    \item All vertices of the already encountered trinagles have been colored white, black or gray
+    \item No two connected vertices have received the same color.
+\end{enumerate}
+This implies that we have computed a valid 3-coloring when all triangles have been encountered. 
+\\
+\\
+The depth first search can be started from any node of $g(T_\mathcal{P})$; the three vertices of the corresponding triangle are colored white, gray and black. Now suppose, we reach a node $v$ in $g$, coming from a node $\mu$. Hence $t(v)$ and $t(\mu)$ share a diagonal. Since the vertices of $t(\mu)$ have already been colored, only one vertex remains to be colored. Because $g(T_\mathcal{P})$ is a tree, the other nodes adjacent to $v$ have not been visited yet, and we still have the freedom to give the vertex the remaining color.
+\\
+\\
+We conclude that the 3-coloring approach is optimal in worst case.
+\\
+\\
+\subsubsection*{Lemma 3.4}
+A polygon is y-monotone if its has no split vertices or merge vertices.
+\\
+\\
+\textit{\textbf{Proof}} Suppose $\mathcal{P}$ is not y-monotone. We have to prove that $\mathcal{P}$ contains a split or a merge vertex. Since $\mathcal{P}$ is not monotone, there is a horizontal line $\mathcal{P}$ that intersects $\mathcal{P}$ in more than  one connected component. We can choose $L$ such that the leftmost component is a segment and not a single point. Let $p$ be the left endpoint of this segment, and let $q$ be the right endpoint. 
+\\
+\\
+Starting at $q$, we follow the boundary of $\mathcal{P}$ such that $p$ lies to the left of the boundary (this means that we go up from $q$). At some point $r$, we will go up again. If $r \neq p$, then the highest vertex we encountered while going from $q$ to $r$ must be a split vertex. If $r = p$, we again follow the boundary of $\mathcal{P}$ starting at $q$, but in the other direction. 
+\\
+\\
+Let $r'$ be the point where the boundary intersects $L$. We cannot have $r' = p$, because that would mean that the boundary of $\mathcal{P}$ intersects $L$ only twice, contradicting that $L$ intersects $\mathcal{P}$ in more than one component. So we have $r' \neq p$, implying that the lowest vertex we encountered going from $q$ to $r'$ must be a merge vertex.
+
+\subsubsection*{Lemma 3.5}
+The algorithm for transforming a polygon monotone adds a set of non-intersecting diagonals that partitions $\mathcal{P}$ into monotone subpolygons.
+\\
+\\
+\textit{\textbf{Proof}} NOT DONE.
+
+
 \clearpage
 
 \end{document}
