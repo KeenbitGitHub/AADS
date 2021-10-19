@@ -18,10 +18,304 @@
 
 \section*{Max Flow}
 \subsection*{General Knowledge}
+In the maximum-flow problem, we wish to compute the greatest rate at which we can ship material from the source to the sink without violating any capacity constraints. 
+\\
+\\
+A \textit{\textbf{flow network}} $G = (V, E)$ is a directed graph in which each edge $(u, v) \in E$ has a nonnegative \textit{\textbf{capacity}} $c(u, v) \geq 0$. We further require that if $E$ contains an edge $(u, v)$, then here is no edge $(v, u)$ in the reverse direction. If $(u, v) \notin E$, then we define $c(u, v) = 0$, and we disallow self-loops. We distinguish two vertices in a flow network a \textit{\textbf{source}} $s$ and a \textit{\textbf{sink}} $t$. For convenience, we assume that each vertex lies on some path from the source to the sink.
+\\
+\\
+A \textit{\textbf{flow}} in $G$ is a real-valued function $f: V \times V \rightarrow \mathbb{R}$ taht satisfies the following two properties:
+\begin{enumerate}
+    \item \textbf{Capacity constraint}: For all $u, v \in V$, we require $0 \leq f(u, v) \leq c(u, v)$
+    \item For all $u \in V - \{s, t\}$, we require
+    $$\sum_{v \in V} f(v, u) = \sum_{v \in V} f(u, v).$$
+    When $(u, v) \notin E$ there can be no flow from $u$ to $v$, hence $f(u, v) = 0$
+\end{enumerate}
+We call the nonnegative quantity $f(u, v)$ the flow from vertex $u$ to vertex $v$. The \textit{\textbf{value}} $|f|$ of a flow $f$ is defined as
+$$|f| = \sum_{v \in V} f(s, v) - \sum_{v \in V} f(v, s).$$
+In the \textit{\textbf{maximum-flow problem}}, we are given a flow network $G$ with source $s$ and $t$, and we wish to maximize $|f|$ such the capacity constraint and the flow conservation are not violated.
+\\
+\\
+We call the two edges $(v_1, v_2)$ and $(v_2, v_1)$ \textit{\textbf{antiparallel}}. If we wish to model a flow problem with antiparallel adges, we must transform the network into an equivalent one containing no antiparallel edges. This is done by choosing one of the two antiparallel edges, in this case $(v_1, v_2)$, and split it by adding a new vertex $v'$ and replacing edge $(v_1, v_2)$ with the pair of edges $(v_1, v')$ and $(v', v_2)$. We also set the capacity of both new edges to the capacity of the original edge. The resulting network satisfies the property that if an edge is in the network, the reverse edge is not.
+\\
+\\
+A maximum-flow problem may have several sources and sinks, rather than just one of each. Fortunately, this problem is no harder than ordinary maximum flow. We can reduce the problem of determining a maximum flow in a network with multiple sources and multiple sinks to an ordinary maximum-flow problem. We add a \textit{\textbf{supersource}} $s$ and add a directed edge $(s, s_i)$ with capacity $c(s, s_i) = \infty$ for each $i = 1, 2, ..., m$. We also create a new \textit{\textbf{supersink}} $t$ and add a directed edge $(t_i, t)$ with capacity $c(t_i, t) = \infty$ for each $i = 1, 2, ..., n$, where $m$ and $n$ are the amount of sources and sinks in the original graph, respectively.
+\\
+\\
+The Ford-Fulkerson method is a method for solving the maximum-flow problem. It iteratively increases the value of the flow. We start with $f(u, v) = 0$ for all $u, v \in V$, giving an initial flow of value $0$. At each iteration, we increase the flow value in $g$ by finding and "augmenting path" (a path from the source to sink in the residual network) in an associated "residual network" $G_f$. Once we know the edges of an augmenting path in $G_f$, we can easily identify specific edges in $G$ for which we can change the flow so that we increase the value of the flow. We repeatedly change the flow until the residual network has no more augmenting paths. The max-flow min-cut theorem will show that upon termination, this process yields a maximum flow.
+\\
+\\
+The residual network $G_f$ consists of edges with capacities that represent how we can change the flow on edges of $G$. An edge of the flow network can admit an amount of additional flow equal to the edge's capacity minus the flow on that edge. If that value if positive, we place that edge into $G_f$ with a "residual capacity" of $c_f(u, v) = c(u, v) - f(u, v)$. The only edge in $G$ that are in $G_f$ are those that can admit more flow.
+\\
+\\
+The residual network $G_f$ may also contain edges that are not in $G$.  In order to represent a possible decrease of a positive flow $f(u, v)$ on an edge in $G$, we place an edge $(v, u)$ into $G_f$ with residual capacity $c_f(v, u) = f(u, v)$ - that is, an edge that can admit flow in the opposite direction to $(u, v)$, at most conaceling out the flow on $(u, v)$.
+\\
+\\
+The \textit{\textbf{residual capaicty}} $c_f(u, v)$ is thus
+\begin{center}
+    \begin{equation}
+        \label{eqn:26.2}
+        c_f(u, v) =
+        \begin{cases}
+            c(u, v) - f(u, v) & \text{if } (u, v) \in E \\
+            f(v, u) & \text{if } (v, u) \in E \\
+            0 & \text{otherwise}.
+        \end{cases}
+    \end{equation}
+\end{center}
+Because of our assumption that $(u, v) \in E$ implies $(v, u) \notin E$, exactly one case in equation (\ref{eqn:26.2}) applies to each ordered pair of vertices.
+\\
+\\
+Given a flow network $G = (V, E)$ and a flow $f$, the \textit{\textbf{residual network}} of $G$ induced by $f$ is $G_f = (V, E_f)$, where
+$$
+E_f = \{(u, v) \in V \times V : c_f (u, v) > 0\}.
+$$
+That is, each edge of the residual network, or \textit{\textbf{residual edge}}, can admit a flow that is greater than $0$. The edge in $E_f$ are either edges in $E$ or their reversals, and thus $|E_f| \leq 2 |E|$.
+\\
+\\
+A flow in a residual network pro vides a roadmap for adding flow to the original flow network. If $f$ is a flow in $G$ and $f'$ is a flow in the corresponding residual network $G_f$, we define $f \uparrow f'$, the \textit{\textbf{augmentation}} (or "change") of flow $f$ by $f'$, to be a functio nfrom $V \times V$ to $\mathbb{R}$, defined by
+\begin{center}
+    \begin{equation}
+        \label{eqn:26.4}
+        (f \uparrow f')(u, v) =
+        \begin{cases}
+            f(u, v) + f'(u, v) - f'(v, u) & \textit{if } (u, v) \in E \\
+            0 & \text{otherwise}
+        \end{cases}
+    \end{equation}
+\end{center}
+An \textit{\textbf{augmenting path}} $p$ is a simple path from $s$ to $t$ in the residual network $G_f$. We call the maximum amount by which we can increase the flow on e ach edge in an augmenting path $p$ the \textit{\textbf{residual capacity}} of $p$, given by
+$$
+c_f(p) = \min\{c_f(u, v) : (u, v) \text{is on } p\}.
+$$
+
+\noindent \textbf{Lemma 26.2} \\
+Let $G = (V, E)$ be a flow network, let $f$ be a flow in $G$ and let $p$ be an augmenting path in $G_f$. Define a function $f_p : V \times V \rightarrow \mathbb{R}$ by
+\begin{center}
+    \begin{equation}
+        \label{eqn:26.8}
+        f_p(u, v) =
+        \begin{cases}
+            c_f(p) & \text{if } (u, v) \text{ is on } p \\
+            0 & \textit{otherwise}.
+        \end{cases}
+    \end{equation}
+\end{center}
+Then, $f_p$ is a flow in $G_f$ with value $|f_p| = c_f(p) > 0$.
+\\
+\\
+A \textit{\textbf{cut}} $(S, T)$ of flow network $G = (V, E)$ is a partition of $V$ into $S$ and $T = V - S$ such that $s \in S$ and $t \in T$. If $f$ is a flow, then the \textit{\textbf{net flow}} $f(S, T)$ across the cut $(S, T)$ is defiend to be
+\begin{center}
+    \begin{equation}
+        f(S, T) = \sum_{u \in S} \sum_{v \in T} f(u, v) - \sum_{u \in S} \sum_{v \in T} f(v, u).
+    \end{equation}
+\end{center}
+The \textit{\textbf{capacity}} of the cut $(S, T)$ is
+$$
+c(S, T) = \sum_{u \in S} \sum_{v \in T} c(u, v).
+$$
+A \textit{\textbf{minimum cut}} of a network is a cut whose capacity is minimum over all cuts of the network.
+\\
+\\
+The running time of Ford-Fulkerson depends on how we find the augmenting path $p$. If we choose it poorly, the algorithm might not even terminate - the ford-fulkerson method might fail to terminate only if edge capacities are irriational numbers. If we assume that the capacities are integers, then Ford-Fulkerson has a running time of $O(E \cdot |f^*|)$, where $f^*$ is a max flow. This is because the capacities are integers, we know Ford-Fulkerson increases the value by atleast $1$ at each step, making the runtime be bounded by the max flow ($|f^*|$) and $E$ is used for finding an augmenting path.
+\\
+\\
+We can improve the bound on Ford-Fulkerson by finding the augmenting path $p$ with a breadth-first search. That is, we choose the augmenting path as a \textit{shortest} path from $s$ to $t$ in the residual networ, where each edge has unit distance (weight). This is called the \textit{\textbf{Edmonds-Karp Algorithm}} and it runs in $O(VE^2)$.
+\\
+\\
+Because we can implement each iteration of Ford-Fulkerson in $O(E)$ time when we find the augmenting path by breadth-first search and the total number of flow augmentations is $O(VE)$, the total running time of the Edmonds-Karp algorithm is $O(VE^2)$. 
+
 \clearpage
-\subsection*{Proofs}
-\clearpage
+
 \subsection*{Examples}
+\subsubsection*{Maximum bipartite matching}
+Given an undirected graph $G = (V, E)$, a \textit{\textbf{matching}} is a subset of edges $M \subseteq E$ such taht for all vertices $v \in V$, at most one edge of $M$ is incident on $v$. We say that a vertex $v \in V$ is \textit{\textbf{matched}} by the matching $M$ if some edge in $M$ is incident on $v$; otherwise, $v$ is \textit{\textbf{unmatched}}. A \textit{\textbf{maximum matching}} is amatching of maximum cardinality. In this section, we shall restrict our attention to findin maximum matchings in bipartite graphs: graphs in which the vertex set can be partitioned into $V = L \cup R$, where $L$ and $R$ are disjoint and all edges in $E$ go between $L$ and $R$. We furhter assume that every vertex in $V$ has at least one incident edge.
+\\
+\\
+We can use the Ford-Fulkerso nmethod to find a maximum matching in an undirected bipartite graph $G = (V, E)$ in time polynomial in $|V|$ and $|E|$. The trick is to construct a flow network in which flows correspond to matchings. We define the \textit{\textbf{corresponding flow network}} $G' = (V', E')$ for the bipartite graph $G$ as follows. We let the source $s$ and sink $t$ be new vertices not in $V$, $V' = V \cup \{s, t\}$, and 
+$$
+E' = \{(s, u) : u \in L\} \cup \{(u, v) : (u, v) \in E\} \cup \{(v, t) : v \in R\}.
+$$ 
+To complete the construction, we assign unit capacity to each edge in $E'$. Since each vertex in $v$ has at least one incident edge, $|E| \geq |V|/2$. Thus, $|E| \leq |E'| = |E| + |V| \leq 3 |E´|$, and so $|E'| = \Theta(E)$.
+
+\clearpage
+
+\subsection*{Proofs}
+\subsubsection*{Lemma 26.1}
+Let $G = (V, E)$ be a flow network with source $s$ and sink $t$, and let $f$ be a flow in $G$. Let $G_f$ be the residual network of $G$ induced by $f$, and let $f'$ be a flow in $G_f$. Then the function $f \uparrow f'$ is a flow in $G$ with value $|f \uparrow f'| = |f| + |f'|$.
+\\
+\\
+\textbf{\textit{Proof}} We first verify that $f \uparrow f'$ obeys the capacity constraint for each edge in $E$ and flow conservation at each vertex in $V - \{s, t\}$. \\
+For the capacity constraint, first observe that if $(u, v) \in E$, then $c_f(v, u) = f(u, v)$. Therfore, we have $f'(v, u) \leq c_f(v, u) = f(u, v)$, and hence
+\begin{center}
+    \begin{align*}
+        (f \uparrow f')(u, v) & = f(u, v) + f'(u, v) - f'(v, u) && \text{(by equation (\ref{eqn:26.4}))}\\
+        & \geq f(u, v) + f'(u, v) - f(u, v) && \text{(because } f'(v, u) \leq f(u, v) \text{)}\\
+        & = f'(u, v) \\
+        & \geq 0.
+    \end{align*}
+\end{center}
+In addition,
+\begin{center}
+    \begin{align*}
+        (f \uparrow f')(u, v) &= f(u, v) + f'(u, v) - f'(v, u) && \text{(by equation (\ref{eqn:26.4})} \\
+        &\leq f(u, v) + f'(u, v) && \text{(because flows are nonegative)} \\
+        &\leq f(u, v) + c_f(u, v) && \text{(capacity constraint)} \\
+        &= f(u, v) + c(u, v) - f(u, v) && \text{(definition of } c_f \text{)} \\
+        &= c(u, v).
+    \end{align*}
+\end{center}
+To show that flow conservation holds and that $|f \uparrow f'| = |f| + |f'|$, we first prove the claim that for all $u \in v$, we have
+\begin{center}
+    \begin{equation}
+        \label{eqn:26.5}
+        \sum_{v \in v} (f \uparrow f')(u, v) - \sum_{v \in V} (f \uparrow f')(v, u) = \sum_{v \in V} f(u, v) - \sum_{v \in V} f(v, u) + \sum_{v \in V} f'(u, v) - \sum_{v \in V} f'(v, u).
+    \end{equation}
+\end{center}
+Because we disallow antiparallel edges in $G$, we know that for each vertex $u$, there can be an edge $(u, v)$ or $(v, u)$ in $g$, but never both. For a fixed vertex $u$, let's define $V_1(u) = \{v: (u, v) \in E\}$ and $V_2(u) = \{v: (v, u) \in E\}$. By the definition of flow augmentation in euqation (\ref{eqn:26.4}), only vertices in $V_1(u)$ can have positive $(f \uparrow f')(u,v)$, and only vertices in $V_2(u)$ can have positive $(f \uparrow f')(v, u)$. Thus, we have
+\begin{center}
+    \begin{align*}
+        & \sum_{v \in V} (f \uparrow f')(u, v) - \sum_{v \in V} (f \uparrow f') (v, u) \\
+        &= \sum_{v \in V_1(u)} (f \uparrow f') (u, v) - \sum_{v \in V_2(u)} (f \uparrow f') (v, u) \\
+        &= \sum_{v \in V_1(u)} \left( f(u, v) + f'(u, v) - f'(v, u) \right) - \sum_{v \in V_2(u)} \left( f(v, u) + f'(v, u) - f'(u, v) \right) \\
+        &= \sum_{v \in V_1 (u)} f(u, v) + \sum_{v \in V_1 (u)} f'(u, ) - \sum_{v \in V_1 (u)} f'(v, u) - \sum_{v \in V_2(u)} f(v, u) - \sum_{u \in V_2(u)} f'(v, u) + \sum_{v \in V_2 (u)} f'(u, v) \\
+        &= \sum_{v \in V_1 (u)} f(u, v) - \sum_{v \in V_2 (u)} f(v, u) + \sum_{v \in V_1(u)} f'(u, v) + \sum_{v \in V_2 (u)} f'(u, v) - \sum_{v \in V_1 (u)} f'(v, u) - \sum_{v \in V_2 (u)} f'(v, u)
+    \end{align*}
+\end{center}
+In the last equation we can extend all four summations to sum over $v$, since each additional term has value $0$. With all four summations over $V$, instead of just subsets of $V$, we get equation (\ref{eqn:26.5}). \\
+Now we are ready to prove flow conservation for $f \uparrow f'$ and that $|f \uparrow f'| = |f| + |f'|$. For the latter property, let $u = s$ in equation (\ref{eqn:26.5}). Then, we have
+\begin{center}
+    \begin{align*}
+        |f \uparrow f'| &= \sum_{v \in V} (f \uparrow f')(s, v) - \sum_{v \in V} (f \uparrow f') (v, s) \\
+        &= \sum_{v \in V} f(s, v) - \sum_{v \in V} f(v, s) + \sum_{v \in V} f'(s, v) - \sum_{v \in V} f'(v, s) \\
+        &= |f| + |f'|.
+    \end{align*}
+\end{center}
+For flow conservation, observe that for any vertex $u$ that is neither $s$ not $t$, flow conservation for $f$ and $f'$ means that the right-hand side of equation (\ref{eqn:26.5}) is $0$, and thus $\sum_{v \in V} (f \uparrow f')(u, v) = \sum_{v \in V} (f \uparrow f') (v, u)$.
+
+\subsubsection*{Corollary 26.3}
+Let $G = (V, E)$ be a flow network, let $f$ be a flow in $G$, and let $p$ be an augmenting path in $G_f$. Let $f_p$ be defined as in equation (\ref{eqn:26.8}), and suppose that we augment $f$ by $f_p$. then the function $f \uparrow f_p$ is a flow in $G$ with value $|f \uparrow f_p| = |f| + |f_p| > |f|$. \\
+\textit{\textbf{Proof}} Immediate from Lemmas 26.1 and 26.2.
+
+\subsubsection*{Lemma 26.4}
+Let $f$ be a flow in a flow network $G$ with source $s$ and sink $t$, and let $(S, T)$ be any cut of $G$. Then the net flow across $(S, T)$ is $f(S, T) = |f|$. \\
+\textbf{\textit{Proof}} \\
+We extend the definition of net flow from cuts to arbitrary pairs of subsets of $V$ as follows. For any $A \subseteq V$ and $B \subseteq V$,
+$$
+f(A, B) = \sum_{u \in A} \sum_{v \in B} f(u, v) - f(v, u).
+$$
+Now we proceed with the proof. The definition of net flow above immediately implies $f(S, S) = 0$, since the we are at some point adding $f(u, v)$, however, at some point $u$ and $v$ switches place, hence why we subtract $f(u, v)$ again. Thus, we have
+$$f(S, T) = f(S, S) + f(S, T) = f(S, V) = \sum_{u \in S} \sum_{v \in V} (f(u, v) - f(v, u)).$$
+On the right-hand side, every $u \in S \backslash \{s\}$ contributes $0$ to the sum due to flow conservation. Thus,
+$$
+f(S, T) = \sum_{u \in \{s\}} \sum_{v \in \{V\}} (f(u, v) - f(v, u)) = \sum_{v \in V} (f(s, v) - f(v, s)) = |f|.
+$$
+
+\subsubsection*{Corollary 26.5}
+The value of any flow $f$ in a flow network $G$ is bounded from above by the capacity of any cut of $G$.
+\textit{\textbf{Proof}} Let $(S, T)$ be any cut of $G$ and let $f$ be any flow. By Lemma 26.4 and the capacity constraint,
+\begin{center}
+    \begin{align*}
+        |f| &= f(S, T) \\
+        &= \sum_{u \in S} \sum_{v \in T} f(u, v) - \sum_{u \in S} \sum_{v \in T} f(v, u) \\
+        &\leq \sum_{u \in S} \sum_{v \in T} f(u, v) \\
+        &\leq \sum_{u \in S} \sum_{v \in T} c(u, v) \\
+        = c(S, T).
+    \end{align*}
+\end{center}
+
+\subsubsection*{Theorem 26.6 (Max-flow min-cut theorem)}
+If $f$ is a flow in a flow network $G = (V, E)$ with source $s$ and sink $t$, then the following conditions are equivalent:
+\begin{enumerate}
+    \item $f$ is a maximum flow in $G$
+    \item The residual network $G_f$ contains no augmenting paths
+    \item $|f| = c(S, T)$ for some cut $(S, T)$ of $G$.
+\end{enumerate}
+\textit{\textbf{Proof}} \\
+$(1) \Rightarrow (2)$: Suppose for the sake of contradiction that $f$ is a maximum flw in $G$ but that $G_f$ has an augmenting path $p$. Then, by Corollary 26.3, the flow found by augmenting $f$ by $f_p$, where $f_p$ is given by equation (\ref{eqn:26.8}), is a flow in $G$ with value strictly greater than $|f|$, contradicting the assumption that $f$ is a maximum flow. \\
+$(2) \Rightarrow (3)$: Suppose that $G_f$ has no augmenting path, that is, that $G_f$ contains no path from $s$ to $t$. Define
+$$
+S = \{v \in V: \text{there is a path from } s \text{to } v in G_f\}
+$$
+and $T = V - S$. The parition $(S, T)$ is a cut: we have $s \in S$ trivially and $t \notin S$ because there is no path from $s$ to $t$ in $G_f$. Now consider a pair of vertices $u \in S$ and $v \in T$. If $(u, v) \in E$, we must have $f(u, v) = c(u, v)$, since otherwise $(u, v) \in E_f$, which would place $v$ in set $S$. If $(v, u) \in E$, we must have $f(v, u) = 0$, because otherwise $c_f(u, v) = f(v, u)$ would be positive and we we ould have $(u, v) \in E_f$, which would place $v$ in $S$. Of course, if neither $(u, v)$ nor $(v, u)$ is in $E$, htne $f(u, v) = f(v, u) = 0$. We thus have
+\begin{center}
+    \begin{align*}
+        f(S, T) &= \sum_{u \in S} \sum_{v \in T} f(u, v) - \sum_{v \in T} \sum_{u \in S} f(v, u) \\
+        &= \sum_{u \in S} \sum_{v \in T} c(u, v) - \sum_{v \in T} \sum_{u \in S} 0 \\
+        &= c(S, T).
+    \end{align*}
+\end{center}
+By Lemma 26.4 therefore $|f| = f(S, T) = c(S, T)$. \\
+$(3) \Rightarrow (1)$: By Corollary 26.5, $|f| \leq c(S, T)$ for all cuts $(S, T)$. The condition $|f| = c(S, T)$ thus implies that $f$ is a maximum flow.
+
+\subsubsection*{Lemma 6.7}
+If the Edmonds-Karp algorithm is run on a flow network $G = (V, E)$ with source $s$ and sink $t$, then for all verties $v \in V - \{s, t\}$, the shortest-path distance $\delta_f(s, v)$ in the residual network $G_f$ increases monotonically with each flow augmentation. \\
+\textit{\textbf{Proof}} Let $f$ be the flow just before the first augmentation that decreases some shortest-path distance, and let $f'$ be the flow just afterward. Let $v$ be the vertex with minimum $\delta_{f'} (s, v)$ whose distance was decreased by the augmentation, so that $\delta_{f'}(s, v) < \delta_f (s, v)$. Let $p = s \rightsquigarrow u \rightarrow v$ be a shortest path from $s$ to $v$ in $G_{f'}$, so that $(u, v) \in E_{f'}$, and
+\begin{center}
+    \begin{equation}
+        \label{eqn:26.12}
+        \delta_{f'} (s, u) = \delta_{f'} (s, v) - 1.
+    \end{equation}
+\end{center}
+
+Because of how we chose $v$, we know that the distance of vertex $u$ from the source $s$ did not no decrease, i.e.,
+\begin{center}
+    \begin{equation}
+        \label{eqn:26.13}
+        \delta_{f'}(s, u) \geq \delta_f (s, u).
+    \end{equation}
+\end{center}
+We claim that $(u, v) \notin E$. Why? If we had $(u, v) \in E_f$, then we would also have
+\begin{center}
+    \begin{align*}
+        \delta_f (s, v) &\leq \delta_f (s, u) + 1 && \text{(by lemma 24.10, the triangle inequality)} \\
+        &\leq \delta_{f'} (s, u) + 1 \text{(by inequality } (\ref{eqn:26.13}) \text{)} \\
+        &= \delta_{f'}(s, v) \text{(by equation } (\ref{eqn:26.12}\text{)}
+    \end{align*}
+\end{center}
+which contradicts our assumption that $\delta_{f'} (s, v) < \delta_f (s, v)$. \\
+How can we have $(u, v) \notin E_f$ and $(u, v) \in E_f$? The augmentation must ha ve increased the flow from $v$ to $u$. the Edmonds-Karp algorithm always augments flow along shortest paths, and therefore it augmented along a shortest path from $s$ to $u$ in $G_f$ that has $(v, u)$ as its last edge. Therefore,
+\begin{center}
+    \begin{align*}
+        \delta_f (s, v) &= \delta_f (s, u) - 1 \\
+        &\leq \delta_{f'} (s, u) - 1 && \text{(by inequality (\ref{eqn:26.13}))} \\
+        &= \delta_{f'} (s, v) - 2 && \text{(by equation (\ref{eqn:26.12}))}
+    \end{align*}
+\end{center}
+which contradicts our assumption that $\delta_{f'}(s, v) < \delta_f (s, v)$. We conclude that our assumption that such a vertex $v$ exists is incorrect.
+
+\subsubsection*{Theorem 26.8}
+If the Edmonds-Karp algorithm is run on a flow network $G = (V, E)$ with source $s$ and sink $t$, then the total number of flow augmentations performed by the algorithm is $O(VE)$. \\
+\textbf{\textit{Proof}} We say that an edge $(u, v)$ i na residual network $G_f$ is \textit{\textbf{critical}}on an augmenting path $p$ if the residual capacity of $p$ is the residual capacity of $(u, v)$. After we have augmented flow along an augmenting path, anycritical edge on the path disappears from the residual network. Moreover, at least one edge on any augmenting path must be critical. \\
+Let $u$ and $v$ be vertices in $V$ that are connected by an edge in $E$. Since augmenting paths are shortest paths, when $(u, v9$ is critical for the first time, we have
+$$
+\delta_f (s, v) = \delta_f (s, u) + 1.
+$$
+Once the flow is augmented, the edge $(u, v)$ disappears from the residual network. It cannot reappear later on another augmenting path until after the flow from $u$ to $v$ is decreased, which occurs only if $(v, u)$ appear on an augmenting path. If $f'$ is the flow in $G$ when this event occurs, then we have
+$$
+\delta_{f'} (s, u) = \delta_{f'} (s, v) + 1.
+$$
+Since $\delta_f (s, v) \leq \delta_{f'} (s, v)$ by lemma 26.7, we have
+\begin{center}
+    \begin{align*}
+        \delta_{f'} (s, u) &= \delta_{f'} (s, v) + 1 \\
+        &\geq \delta_f (s, v) + 1 \\
+        &= \delta_f (s, u) + 2.
+    \end{align*}
+\end{center}
+Consequently, from the time $(u, v)$ become critical to the time when it next becomes critical, the distance of $u$ from the source increases by at least $2$- The distance of $u$ from the source is initially at least $0$. The intermediate vertices on a shortest path from $s$ to $u$ cannot contain $s$, $u$ or $t$. Therefore, until $u$ becomes unreachable from the source, if ever, its distance is at most $|V| - 2$. Thus, after the first time that $(u, v)$ becomes critical, it can become critical at most $(|V| - 2)/2 = |V|/2 -1$ times more, for a total of at most $|V|/2$ times. Since there are $O(E)$ pair of vertices that can have anedge between them in a residual network, the total number of critical edges during the entire execution of the Edmonds-Karp algorithm is $O(VE)$. Each augmenting path has at least one critical edge, and hence the theorem follows.
+
+\subsubsection*{Lemma 26.9}
+Let $G = (V, E)$ be a bipartite graph with vertex partition $V = L \cup R$, and let $G' = (V', E')$ be its corresponding flow network. If $M$ is amatching in $G$, then there is an integer-valued flow $f$ in $G'$ with value $|f| = |M|$. Conversely, if $f$ is an integer-valued flow in $G'$, then there is a matching $M$ in $G$ with cardinality $|M| = |f|$. \\
+\textit{\textbf{Proof}} We first show that a matching $M$ in $G$ corresponds to an integer-valued flow $f$ in $G'$. Define $f$ as follows. If $(u, v) \in M$, then $f(s, u) = f(u, v) = f(v, t) = 1$. For all other edges $(u, v) \in E'$, we define $f(u, v) = 0$. It is simple to verify that $f$ satisfies the capacity constraint and flow conservation. \\
+Intuitively, each edge $(u, v) \in M$ corresponds to one uit of flow in $G'$ that traverses the path $s \to u \to v \to t$. Moreover, the paths induced by edges in $M$ are vertex-disjoint, except for $s$ and $t$. The net flow across cut $(L \cup \{s\}, R \cup \{t\})$ is equal to $|M|$; thus the value of the flow is $|f| = |M|$. \\
+To prove the converse, let $f$ be an integer-valued flow in $G'$, and let
+$$
+M = \{(u, v) : U \in L, v \in R, \text{ and } f(u, v) > 0\}.
+$$
+Each vertex $u \in L$ has only one entering edge and its capacity is $1$. Thus, each $u \in L$ has t most one unit of flow entering it, and if one unit of flow does enter, by flow conservation, one unit of flow must leave. Furthermore, since $f$ is integer-valued, for each $u \in L$, the one unit of flow can enter on at most one edge and can leave on at most one edge. Thus, one unit of flow enters $u$ iff there is exactly one vertex $v \in R$ such that $f(u, v) = 1$, and at most one edge leaving each $u \in L$ carries positive flow. A symmetric argument applies to each $v \in R$. The set $M$ is therefore at matching. \\
+To see that $|M| = |f|$, observe that for every matched vertex $u \in L$, we have $f(s, u) = 1$, and for every edge $(u, v) \in E - M$, we have $f(u, v) = 0$. Consequently, $f(L \cup \{s\}, R \cup \{t\})$, the net flow across cut $(L \cup \{s\}, R \cup \{t\})$, is equal to $|M|$. Thus, we have $|f| = f(L \cup \{s\}, R \cup \{t\}) = |M|$.
+
 \clearpage
 
 \section*{Linear Programming and Optimization}
