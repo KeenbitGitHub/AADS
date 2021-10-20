@@ -320,8 +320,291 @@ To see that $|M| = |f|$, observe that for every matched vertex $u \in L$, we hav
 
 \section*{Linear Programming and Optimization}
 \subsection*{General Knowledge}
+Many problems take the form of maximizing or minimizing an objective, given limited resources and competing constriants. If we can specify the objective as linear function of certain variables, and if we can specify the constrants on resources as equalities or inequalities on those variables, then we have a \textit{\textbf{linear-programming problem}}.
+\\
+\\
+In the general linear-programming problem, we wish to optimize a linear function subject to a set of linear inequalities. Given a set of real numbers $a_1, a_2, ..., a_n$ and a set of variables $x_1, x_2, ..., x_n$, we define a \textit{\textbf{linear function}} $f$ on those variables by
+$$
+f(x_1, x_2, ..., x_n) = a_1x_1 + a_2x_2 + ... + a_n x_n = \sum_{j = 1} ^n a_j x_j.
+$$
+If $b$ is a real number and $f$ is a linear function, then the equation
+$$
+f(x_1, x_2, ..., x_n2) = b
+$$
+is a \textit{\textbf{linear equality}} and the inequalities
+$$
+f(x_1, x_2, ..., x_n) \leq b
+$$
+and
+$$
+f(x_1, x_2, ..., x_n) \geq b
+$$
+are \textit{\textbf{linear inequalities}}. We use the general term \textit{\textbf{linear constraints}} to denote either linear equalities or linear inequalities. In linear programming , we do not allow strict inequalities. Formally, a \textit{\textbf{linear-programming problem}} is the problem either minimizing or maximizing a linear function subject to a finite set of linear constraints.
+\\
+\\
+We call any setting of the variables $x_1, x_2, ..., x_m$ that satisfies all the constraints a \textit{\textbf{feasible solution}} to the linear program. If we graph the constraints in the $(x_1, ..., x_m)$-Cartesian coordinate system, we see that each constraint corresponds to ahalf-space in $m$-dimensional space. The intersection of these half-spaces forms the \textit{\textbf{feasible region}} and the function we wish to maximize the \textit{\textbf{objective function}}. We call the feasible region formed by the intersection of these half-spaces a \textit{\textbf{simplex}}. We call the value of the objective function at a particular point the \textit{\textbf{objective value}}. A feasible solution whose objective value is maximum over all feasible solutions is an \textit{\textbf{optimal objective value}}. If a linear program has no feasible solutions, we say that the linear program is \textit{\textbf{infeasible}}; otherwise it it \textit{\textbf{feasible}}. If a linear program has some feasible solutions but does not have a finite optimal objective value, we say that the linear program is \textit{\textbf{unbounded}}.
+\\
+\\
+The \textit{\textbf{simplex algorithm}} takes as input a linear program and returns an optimal solution. It starts at some vertex of the simplex and performs a sequence of iterations. In each iteration, it moves along an edge of the simplex from a current vertex to a neighboring vertex whose objective value is no smaller than that of the current vertex. The simplex algorithm terminates when it reaches a local maximum, which is a vertex from which all neighboring vertices have a smaller objective value. Because the feasible region is convex and the objective function is linear, the local optimum is actually a global optimum.
+\\
+\\
+If we add to a linear pgoram the additional requirement that all variables take on integer values, we have an \textit{\textbf{integer linear program}}. Finding a feasible solution to this problem is NP-hard. In constrast, we can solve a general linear-programming problem in polynomial time.
+\\
+\\
+If we have a linear program with variables $x = (x_1, x_2, ..., x_n)$ and wish to refer to a particular setting of the variables, we shall use the notation $\bar{x} = (\bar{x}_1, \bar{x}_2, ..., \bar{x}_n)$.
+\\
+\\
+In \textit{\textbf{standard form}}, we are given $n$ real numbers $c_1, c_2, ..., c_n$; $m$ real numbers $b_1, b_2, ..., b_m$; and $mn$ real numbers $a_{ij}$ for $i = 1, 2, ..., m$ and $j = 1, 2, ..., n$. We wish to find $n$ real numbers $x_1, x_2, ..., x_n$ that maximize 
+$$\sum_{j = 1} ^n c_j x_j$$
+subject to
+\begin{center}
+    \begin{align*}
+        \sum_{j = 1} ^n a_{ij} x_j & \leq bi && \text{for } i = 1, 2, ..., m \\
+        x_j &\geq 0 && \text{for } j = 1, 2, ..., n.
+    \end{align*}
+\end{center}
+where the last constraint are the \textit{\textbf{nonnegativity constraints}}, which are required in standard form. \\
+Sometimes we find it convenient to express a linear program in a more compact form. If we create an $m \times n$ matrix $A = (a_{ij})$, an $m$-vector $b = (b_i)$, an $n$-vector $c = (c_j)$, and an $n$-vector $x = (x_j)$, then we can rewrite the linear program to
+\begin{center}
+    \begin{align*}
+        & \text{maximize } \\
+        && c^T x \\
+        & \text{subject to} \\
+        && Ax \leq b \\
+        && x \geq 0.
+    \end{align*}
+\end{center}
+We see that we can specify a linear program in standard form by a tuple $(A, b, c)$.
+\\
+\\
+A linear program might not be in standard form of any of four possible reasons
+\begin{enumerate}
+    \item The objective function might be a minimization rather than a maximization
+    \item There might be variables without nonegativity constraints
+    \item There might be equality constraints, which have an equal sign rather than a less-than-or-equal-to sign
+    \item There might be inequality constraints, but instead of having a less-than-or-equal-to sign, they have a greater-than-or-equal-to sign.
+\end{enumerate}
+We say that two maximization linear programs $L$ and $L'$ are \textit{\textbf{equivalent}} if for each feasible solution $\bar{x}$ to $L$ with objective value $z$, there is a corresponding feasible solution $\bar{x}'$ to $L'$ with objective value $z$, and for each feasible solution $\bar{x}'$ to $L'$ with objective value $z$, there is a corresponding feasible solution $\bar{x}$ to $L$ with objective value $z$. A minimization linear program $L$ and a maximization linear program $L'$ are equivalent if for each feasible soltuion $\bar{x}$ to $L$ with objective value $z$, there is a corresponding feasible solution $\bar{x}'$ to $L'$ with objective value $-z$, and for each feasible solution $\bar{x}'$ to $L'$ with objective value $z$, there is a corresponding feasible solution $\bar{x}$ to $L$ with objective value $-z$.
+\\
+\\
+(1). To convert a minimization linear program $L$ into an equivalent maximization linear program $L'$, we simply negate the coefficients in the objective function. Since $L$ and $L'$ have identical sets of feasible solutions and, for any feasible solution, the objective value in $L$ is the negative of the objective value in $L'$, these two linear pr ograms are equivalent
+\\
+\\
+(2). Suppose that some variable $x_k$ does not have a nonnegativity constraint. Then, we replace each occurrence of $x_j$ by $x'_j - x''_j$, and add the nonnegativity constraints $x'_j \geq 0$ and $x''_j \geq 0$. Thus, if the objective function has a term $c_jx_j$, we replace it by $c_jx'_j - c_j x''_j$, and if constraint $i$ has a term $a_{ij}x_j$, we replace it by $a_{ij}x'_j - a_{ij}x''_j$. Any feasible solution $\hat{x}$ to the new linear program corresponds to a feasible solution $\bar{x}$ to the original linear program with $\hat{x}_j = \hat{x}'_j - \hat{x}''_j$ and with the same objective value. Also, any feasible solution $\hat{x}$ to the original linear program corresponds to a feasible solution $\hat{x}$ to the new linea rprogram with $\hat{x}_j' = \bar{x}_j$ and $\hat{x}''_j = 0$ if $\hat{x}_j \geq 0$, or with $\hat{x}''_j = -\bar{x}_j$ and $\hat{x}'_j = 0$ if $\bar{x}_j < 0$. Thus, the two linear programs are equivalent.
+\\
+\\
+(3). Suppose that a linear program has an equality constraint $f(x_1, x_2, ..., x_n) = b$. Since $x = y$ iff both $x \geq y$ and $x \leq y$, we can replace this equality constraint by the pair of inequality constraints $f(x_1, x_2, ..., x_n) \leq b$ and $f(x_1, x_2, ..., x_n) \geq b$.
+\\
+\\
+(4) We can convert the greater-than-or-equal-to constraints to less-than-or-equal-to constraints by multiplying these constraints through by $-1$. That is, any inequality of the form
+$$
+\sum_{j = 1} ^n a_{ij} x_j \geq b_i
+$$
+is equivalent to
+$$
+\sum_{j = 1} ^n -a_{ij}x_j \leq -b_i.
+$$
+To solve a linear program with the simplex algorithm, we prefer to express it in a form in which the nonegativity constraints are the only inequality constrants, and the remaining constrants are equalities. Let
+$$
+\sum_{j = 1} ^n a_{ij} x_j \leq b_i
+$$
+be an inequality constraint. We introduce a new variable $s$ and rewrite this inequality as the two constraints
+$$
+s = b_i - \sum_{j = 1} ^n a_{ij} x_j
+$$
+$$
+s \geq 0
+$$
+where $s$ is a \textit{\textbf{slack variable}}. When converting from standard to slack form, we shall use $x_{n+i}$ (instead of $s$) to denote the slack variable associated with the $i$th inequality. The $i$th constraint is therefore
+$$
+x_{n + i} = b_i - \sum_{j = 1} ^n a_{ij}x_j,
+$$
+along with the nonnegativity constraint $x_{n+i} \geq 0$. We call the variables on the left-hand side of the equalities \textit{\textbf{basic variables}} and those on the right-hand side \textit{\textbf{nonbasic variables}}.
+\\
+\\
+For linear programs that satisfy these conditions, we shall sometimes omit the words "maximize" and "subject to", as well as the explicit nonegativity constraint. We shall also use the variable $z$ to denote the value of the objective function. We call the resulting format \textit{\textbf{slack form}}.
+\\
+\\
+In order to use the simplex algorithm, we must convert the linear program into slack form. We say that an equality constraint is \textit{\textbf{tight}} for a particular setting of its nonbasic variables if they cause the constraint's basic variable to become $0$. Similarly, a setting of the nonbasic variables that would make a basic variable become negative \textit{\textbf{violates}} that constraint. Thus, the slack variables explicitly maintain how far each constraint is from being tight, and so they help to determine how much we can increase values of nonbasic variables without violating any constraints.
+\\
+\\
+We focus on the \textit{\textbf{basic solution}}: set all the nonbasic variables on the right-hand side to $0$ and then compute the values of the basic variables on the left-hand side.
+\\
+\\
+Our goal, in each iteration, is to reformulate the linear pr ogram so that the basic solution has a grater objective value. We select a nonbasic variable $x_e$ whose coefficient in the objective function is positive, and we increase the value of $x_e$ as much as possible without violating any of the constraints. The variable $x_e$ becomes basic, and some other variable $x_l$ becomes nonbasic. This last operation is called a \textit{\textbf{pivot}}. A pivot chooses a nonbasic variable $x_e$, called the \textit{\textbf{entering variable}}, and a basic variable $x_l$, called the \textit{\textbf{leaving variable}}, and exchanges their roles. We perform two operations in the simplex algorithm: rewrite equations so that variables move between the left-hand side and the right-hand side, and substritute one equation into another. This is done iteratively untill all coefficients in the objective function are negative.
+\\
+\\
+\textit{\textbf{Duality}} enables us to prove that a solution is indeed optimal: given a maximization problem, we define a related minimization problem such that the two problems have the same optimal objective values. Given a linear program in which the objective is to maximize, we shall describe how to formulate a \textit{\textbf{dual}} linear program in which the objective is to minimize and whose optimal value is identical to that of the original linear program. When refering to dual linear programs, we call the original linear program the \textit{\textbf{primal}}.
+\\
+\\
+Given a primal linear program in standard form we define the dual linear program as
+\begin{center}
+    \begin{align*}
+        \text{minimize} \\
+        &\sum_{i = 1} ^m b_i y_i \\
+        \text{subject to} \\
+        &\sum_{i = 1} ^m a_{ij}y_i \geq c_j && \text{for } j = 1,2,...,n \\
+        &y_i \geq 0 && \text{for } i=1,2,...,m.
+    \end{align*}
+\end{center}
+To form the dual, we change the maximization to a minimization, exchange the roles of coefficients on the right-hand sides and the objective function, and replace ea ch $\leq$ by a $\geq$. Each of the $m$ constraints in the primal has an associated vairable $y_i$ in the dual, and each of the $n$ constraints in the dual has an associated variable $x_j$ in the primal. For example, consider the following linearprogram
+\begin{center}
+    \begin{align*}
+        \text{maximize } \\
+        &3x_1 + x_2 + 2x_3 \\
+        \text{subject to } \\
+        &x_1 + x_2 + 3x_2 \leq 30 \\
+        &2x_1 + 2x_2 + 5x_3 \leq 24 \\
+        &4x_1 + x_2 + 2x_3 \leq 36 \\
+        &x_1, x_2, x_3 \geq 0
+    \end{align*}
+\end{center}
+The dual of this linear program is
+\begin{center}
+    \begin{align*}
+        \text{minimize } \\
+        & 30y_1 + 24y_2 + 36y_3\\
+        \text{subject to} \\
+        &y_1 + 2y_2 + 4y_3 \geq 3 \\
+        &y_1 + 2y_2 + y_3 \geq 1 \\
+        &3y_1 + 5y_2 + 2y_3 \geq 2 \\
+        &y_1, y_2, y_3 \geq 0
+    \end{align*}
+\end{center}
+The simplex algorithm actually implicitly solves both the primal and the dual linear programs simultaneously, thereby providing aproof op optimality. 
+\\
+\\
+Suppose that SIMPLEX returns values $\bar{x} = (\bar{x}_1, \bar{x}_2, ..., \bar{x}_n)$ for a linear program. Let $N$ and $B$ denote the nonbasic and basic variablesr for the final slack form, let $c'$ denote the coefficients in the final slack form, and let $\bar{y} = (\bar{y}_1, \bar{y}_2, ..., \bar{y}_m)$ be defined by
+\begin{center}
+    \begin{math}
+        \bar{y}_i = 
+        \begin{cases}
+            -c'_{n + i} & \text{if } (n + i) \in N, \\
+            0 & \text{otherwise}.
+        \end{cases}
+    \end{math}
+\end{center}
+Then $\bar{x}$ is an optimal solution to the primal linear program, $\bar{y}$ is an optimal solution to the dual linear program, and
+$$
+\sum_{j = 1} ^n c_j \bar{x}_j = \sum_{i = 1} ^m b_i \bar{y}_i.
+$$
+
+
+
 \clearpage
 \subsection*{Proofs}
+\subsubsection*{Lemma 29.8 (Weak linear-programming duality)}
+Let $\bar{x}$ be any feasible solution to a primal linear program in standard form and let $\bar{y}$ be any feasible solution the corresponding dual linear program. Then, we have
+$$
+\sum_{j = 1} ^n c_j \bar{x}_j \leq \sum_{i = 1} ^m b_i \bar{y}_i.
+$$
+\textbf{\textit{Proof}} We have
+\begin{center}
+    \begin{align*}
+        \sum_{j = 1} ^n c_j \bar{x}_j &\leq \sum_{j = 1} ^m \left( \sum_{i = 1} ^m a_{ij} \bar{y}_i \right) \bar{x}_j && \text{(Using } \sum_{i=1} ^m a_{ij} y_i \geq c_j \text{)}\\
+        &= \sum_{i = 1} ^m \left( \sum_{j = 1} ^n a_{ij} \bar{x}_j \right) \bar{y}_i \\
+        &\leq \sum_{i = 1} ^m b_i \bar{y}_i && \text{(Using } \sum_{j = 1} ^n a_{ij} x_j \leq b_i \text{)}
+    \end{align*}
+\end{center}
+
+\subsubsection*{Corollary 29.9}
+Let $\bar{x}$be a feasible solution to aprimal linear program, and let $\bar{y}$ be a feasible solution to the corresponding dual linear program. If
+$$
+\sum_{j = 1} ^n c_j \bar{x}_j = \sum_{i = 1} ^m b_i \bar{y}_i,
+$$
+then $\bar{x}$ and $\bar{y}$ are optimal solutions to the primal and dual linear programs, respectively. \\
+\textit{\textbf{Proof}} By Lemma 29.8, the objective value of a feasible solution to the primal cannot exceed that of a feasible solution to the dual. The primal linear program is a maximization problem and the dual is a minimization problem. Thus, if feasible solutions $\bar{x}$ and $\bar{y}$ have the same objective value, neither can be improved.
+
+\clearpage
+
+\section*{Randomized Algorithms}
+\subsection*{General Knowledge}
+There are two principal advantages to randomized algorithms. The first is performance. Second, many randomized algorithms are simpler to describe and implement than deterministic algorithms of comparable performance.
+\\
+\\
+Let $G$be a connected, undirected multigraph with $n$ vertices. A \textit{multigraph} may contain multiple edges between any pair of vertices. A \textit{cut} in $G$ is a set of edges whose removal results in $G$ being broken into two or more components. A \textit{min-cut} is a cut of minimal cardinality. We now study an algorithm for finding a min-cut of a graph.
+\\
+\\
+We repeat the follwing step: pick an edge uniformly at random and merge the two vertices at its end-points. If as a result there are several edges between some pair of vertices, retain them all. Edges between vertices that are merged are removed, so that there are never any self-loops. We refer to this process of merging the two end-points of an edge into a single-vertex as the \textit{contraction} if that edge. An edge contraction does not reduce the min-cut size in $G$. This is because every cut in the graph at any intermediate stage is a cut in the original graph.
+\\
+\\
+Suppose we were to repeat the min-cut algorithm $n^2/2$ times, making independent random choices each time. The probability that a min-cut is not found in any of the $n^2/2$ attempts is at most
+$$
+\left( 1 - \frac{2}{n^2} \right)^{n^2/2} < \frac{1}{e}.
+$$
+\\
+\\
+A \textit{Las Vegas algorithm} is an algorithm that always gives the correct solution. The only variation from one run to another is its running time. On the other hand a \textit{Monte Carlo algorithm} is an algorithm that may sometimes produce a solution that is incorrect. If the algorithm is run repeatedly with independent random choices each time, the failure probability can be made arbitrarily small, at the expense of running time. A Monte Carlo algoritm is said to have \textit{two-sided error} if there is a non-zero probability that it errs when it outputs either yes or no. It is said to have one-sided error if the probability that it errs is zero for at least one of the possible outputs that it produces.
+\\
+\\
+We say that a Las V egas algorithm is an \textit{effecient Las Vegas} algorithm if on any input its expected running time is bounded by a polynomial function of the input size. Similarly, we say a montecarlo algorithm is an \textit{efficient Monte Carlo} algorithm if on any input its worst-case running time is bounded by a polynomial function of the input size.
+
+\subsection*{Proofs}
+\subsubsection*{Expected runtime of randomized quicksort}
+The expected number of comparisons performed by randomized qucksort is $O(n \log n)$. \\
+\textbf{\textit{Proof}} For $1 \leq i \leq n$, let $S_{(i)}$ denote the $i$th smallest element in the sorted set $S$. Then, define the random variable $X_{ij}$ to assume the value $1$ if $S_{(i)}$ and $S_{j}$ are compared in an execution, and the value $0$ otherwise. Thus the total number of comparisons is 
+$$\sum_{i < j} X_{ij} = \sum_{i = 1} ^{n - 1} \sum_{j = i + 1} ^n X_{ij}.$$
+Then, we are interested in the expected number of comparisons
+$$
+\mathbb{E}\left[ \sum_{i < j} X_{ij} \right] = \sum_{i<j} \mathbb{E} \left[ X_{ij} \right]. 
+$$
+Let $p_{ij}$ denote the probability that $S_{(i)}$ and $S_{(j)}$ are compared in an execution. Since $X_{ij}$ only assumes the values $0$ and $1$, we have
+$$
+\mathbb{E} \left[ X_{ij} \right] = p_{ij} \cdot 1 + (1 - p_{ij}) \cdot 0 = p_{ij}.
+$$
+Each recursive call returns some sublist $[S_{(a)}, ..., S_{(b)}]$. Let $x = S_{(c)}$ be the pivot. Suppose $a \leq i < j \leq b$. If $c < i$ or $c > j$, then $S_{(i)}$ and $S_{(j)}$ are not compared now, but are in the same subtree and might be compared later. If $i < c < j$, then $S_{(i)}$ and $S_{(j)}$ are never compared. If $c = i$ or $c = j$ then $S_{(i)}$ and $S_{(j)}$ are compared once, right now. Thus, $S_{(i)}$ and $S_{(j)}$ are compared iff $S_{(i)}$ or $S_{(j)}$ is first of $S_{(s)}, ..., S_{(j)}$ to be chosen as pivot. Hence why $p_{ij}$ is the conditional probability of picking $S_{(i)}$ or $S_{(j)}$ given that the pivot is picked uniformly at random in ${S_{(i)},S_{(i + 1)}, ..., S_{(j)}}$
+$$
+p_{ij} = \mathbb{P}\left[ c \in \{i, j\} | c \in \{i, i + 1, ..., j\} \right] = \frac{2}{|\{i, i+1, ..., j\}|} = \frac{2}{j - i + 1}.
+$$
+We thus have
+\begin{center}
+    \begin{align*}
+        \mathbb{E}\left[ \sum_{i < j} X_{ij} \right] &= \sum_{i<j} \mathbb{E} \left[ X_{ij} \right] && \text{(Linearity of expectation)} \\
+        &= \sum_{i<j} p_{ij} \\
+        &= \sum_{i<j} \frac{2}{j - i + 1} \\
+        &= \sum_{i = 1} ^{n - 1} \sum_{j = i + 1} \frac{2}{j - i + 1} && \text{(Using} \sum_{i<j} = \sum_{i = 1} ^{n - 1} \sum_{j = i + 1} \text{)} \\
+        &= \sum_{i = 1} ^{n - 1} \sum_{k = 2} ^{n - i + 1} \frac{2}{k} \\
+        &< \sum_{i = 1} ^n \sum_{k = 2} ^n \frac{2}{k} && \text{(Adding more positive terms increases total value)} \\
+        &= 2n \sum_{k = 2} ^n \frac{1}{k} \\
+        &= 2n \left(\left( \sum_{k = 1} ^n \frac{1}{k} \right) -1 \right) \\
+        &= 2n(H_n - 1) && \left( \text{Using } H_n = \sum_{k = 1}^{n} \frac{1}{k} \right) \\
+        &\leq 2n \int_1 ^n \frac{1}{x} dx = 2n \ln n = O(n \log n) && \text{(Using } H_n - 1 \leq \int_{1} ^n \frac{1}{x} dx = \ln n 
+    \end{align*}
+\end{center}
+
+\subsubsection*{Lower-bound of finding min-cut}
+The min-cut algorithm has a probability of $\frac{2}{n(n - 1)}$ of finding a specific min-cut. \\
+For any vertex $v$ in a multigraph $G$, the \textit{neighborhood} of $v$, denoted $\Gamma (v)$, is the set of vertices of $G$ that are adjacent to $v$. The \textit{degree} of $v$, denoted $d(v)$, is the number of edges incident on $v$. For a set $S$ of vertices of $G$, the neighborhood of $S$, denoted $\Gamma(S)$, is the union of the neighborhoods of the constituent vertices.
+\\
+\\
+Let $k$ be the min-cut size and $G_i = (V_i, E_i)$ be the graph $G$ after $i$ iterations, which has $n_i = n - i$ vertices. We fix our attention on a particular min-cut $C$ with $k$ edges. Then, $G_i$ has at least $n_i |C|/2$ edges because
+$$
+\frac{1}{2} \sum_{v \in V_i} d_i(v) \geq \frac{1}{2} n_i |C| \quad \text{(Using } d_i(v) \geq |C| \text{)}.
+$$
+We will bound from below the probability that no edge of $C$ is ever contracted during an execution of the algorithm.
+\\
+\\
+Let $\epsilon_i$ denote the event of not picking an edge of $C$ at the $i$th step, for $1 \leq i \leq n - 2$. Let $p_i = \mathbb{P}\left[ \epsilon_i | \cap_{j=i} ^{i - 1} \epsilon_j \right]$. The probability of picking an edge of $C$ in the $i$th iteration, given that no edge of $C$ has been picked in a previous iteration, is thus
+\begin{center}
+    \begin{align*}
+        1 - p_i &= \mathbb{P}\left[ \epsilon_i | \cap_{j=i} ^{i - 1} \epsilon_j \right] \\
+        &= \mathbb{P} \left[ e \in E_{i - 1} is in C | \cap_{j = 1} ^{i - 1} \epsilon_j \right] \\
+        &= \frac{|C|}{|E_{i - 1}|} \leq \frac{|C|}{\frac{1}{2} n_{i - 1} |C|}
+        &= \frac{2}{n_{i - 1}}
+        &= \frac{2}{n - (i - 1)} p_i \geq 1 - \frac{2}{n-i + 1} = \frac{n-i-1}{n-i+1}.
+        &\Rightarrow
+    \end{align*}
+\end{center} 
+Thus, the probability of finding $C$ can then by found by
+\begin{center}
+    \begin{align*}
+        \mathbb{P} \left[C \text{is found} \right] &= \prod_{i = 1} ^{n-2} p_i \\
+        &\geq \prod_{i = 1} ^{n - 2} \frac{n-1-i}{n+1-i} \\
+        &= \frac{n-2}{n} \frac{n-3}{n-1} \frac{n-4}{n-2} \cdots \frac{3}{5} \frac{2}{4} \frac{1}{3} \\
+        &= \frac{2}{n(n - 1)}.
+    \end{align*}
+\end{center}
+
 \clearpage
 \subsection*{Examples}
 \clearpage
