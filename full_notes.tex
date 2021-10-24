@@ -606,19 +606,300 @@ Thus, the probability of finding $C$ can then by found by
 \end{center}
 
 \clearpage
-\subsection*{Examples}
-\clearpage
 
 \section*{Hashing}
 \subsection*{General Knowledge}
+We have a large universe $U$ of keys, that we wish to map randomly to a range $[m] = \{0, ..., m - 1\}$ of hash values. A \textit{truly random hash function} $h : U \rightarrow [m]$ assigns an independent uniformly random variable $h(x)$ to each key in $x$. Unfortunately truly random hash functions are idealized objects that cannot be implemented.
+\\
+\\
+For a hash function, we care about roughly three things:
+\begin{enumerate}
+    \item The size of the random seed that is necessary to calculate $h(x)$ given $x$
+    \item The time it takes to calculate $h(x)$ given $x$
+    \item Properties of the random variable.
+\end{enumerate}
+In \textit{universal hashing} we wish to generate a random hash function $h : U \to [m]$ from key universe $U$ to a set of hash values $[m] = \{0, ..., m - 1\}$. We think of $h$ as a random variable following some distribution over functions $U \to [m]$. We want $h$ to be \textit{universal}, which means that for any given distinct keys $x, y \in U$, when $h$ is picked at random, we have \textit{low collision probability}, defined by
+$$
+\mathbb{P}[h(x) = h(y)] \leq 1/m.
+$$
+For many applications, it suffices if for some $c = O(1)$, we have
+$$
+\mathbb{P}[h(x) = h(y)] \leq c/m.
+$$
+Then $h$ is called $c$-\textit{approximately universal}.
+\\
+\\
+One classic application of universal hashing is \textit{hash tables with chaining}. We have a set $S \subseteq U$ of keys that we wish to store so that we can find any key from $S$ in expected constant time. Let $n = |S|$ and $m \geq n$. We now pick a universal hash function $h : U \to [m]$, and then create an array $L$ of $m$ lists/chains so that for $i \in [m]$, $L[i]$ is the list of keys that hash to $i$. Now to find out if a key $x \in U$ is in $S$, we only have to check if $x$ is in the list $L[h(x)]$. This takes time proportional to $1 + |L[h(x)]|$ (we add $1$ because it takes constant time to look up the list even if it turns out to be empty).
+\\
+\\
+Another application is that of assigning an unique \textit{signature} $s(x)$ to each key. Thus we want $s(x) \neq s(y)$ for all distinct keys $x, y \in S$. To get this, we pick an universal hash function $s : U \to [n^3]$. The probability of an error (collision) is less than $1/2n$, where $n = |S|$ and $S \subseteq U$.
+\\
+\\
+One classic universal hash function is \textit{multiply-mod-prime}, which is based on a prime number $p \geq u$, where $U = [u] = \{0, ..., u - 1\}$. We pick an uniformly random $a \in [p]_+ = \{1, ..., p - 1\}$ and $b \in [p] = \{0, ..., p - 1\}$, and define $h_{a, b} : [u] \to [m]$ by
+$$
+h_{a, b} (x) = ((ax + b) \text{ mod } p) \text{ mod } m.
+$$
+\\
+\\
+Another hash function is \textit{Multiply-shift}, which ashes from $w$-bit integers to $l$-bit integers. We pick a uniformly random odd $w$-bit integer $a$, and the nwe computer $hh_a : [2^w] \to [2^l]$ as
+$$
+h_a(x) = \left \lfloor (ax \text{ mod } 2^w)/2^{w - l} \right \rfloor.
+$$
+\\
+\\
+A random hash function $h : U \to [m]$ is \textit{strongly universal} (aka. $2$\textit{-independent}) if
+\begin{enumerate}
+    \item Each key is hashed uniformly into $[m]$ (that is, $\forall x \in U, q \in [m] : \mathbb{P}[h(x) = q] = \frac{1}{m})$, and
+    \item Any two distinct keys hash independently.
+\end{enumerate}
+Or, equivalently, for all $x \neq y \in U$, and $q, r \in [m]$ we have
+$$
+\mathbb{P}[h(x) = q \wedge h(y) = r] = \frac{1}{m^2}.
+$$
+\\
+\\
+We say a random hash function $h : U \to [m]$ is $c$\textit{-approximately strongly universal} if
+\begin{enumerate}
+    \item $h$ is $c$-approximately uniform, and
+    \item Every pair of distinct keys hash independently.
+\end{enumerate}
+One application of strongly universal hashing is \textit{coordinated sampling}. The basic idea is that we based on small samples can reason about the similarity of huge sets.
+\\
+\\
+First we consider sampling from a single set $A \subseteq U$ using a strongly universal hash function $h : U \to [m]$ and a threshold $t \in \{0, ..., m\}$. We now sample $x$ if $h(x) < t$, which happens with probability $t/m$ for any $x$. Let $S(A) = \{x \in A | h(x) < t\}$ denote the resulting sample from $A$. Then, we have $\mathbb{E}[|S(A)|] = |A| \cdot t/m$. Conversely, this means that if we have $S(A)$, then we can estimate $|A|$ as $|S(A)| \cdot m/t$.
+
 \clearpage
 \subsection*{Proofs}
-\clearpage
-\subsection*{Examples}
+\subsubsection*{Expected number of elements in each list in hashing with chaining}
+For $x \notin S$ and a universal hash function $h$, the expected number of elements in $L[h(x)]$ is less than or equal to $1$. \\
+\textit{\textbf{Proof}} We have
+\begin{center}
+    \begin{align*}
+        \mathbb{E} \left[ \left| L[h(x)] \right| \right] &= \mathbb{E} \left[ \left| \left\{ y \in S | h(y) = h(x) \right\} \right| \right] \\
+        &= \mathbb{E} \left[ \sum_{y \in S} [h(y) = h(x)] \right] \\
+        &= \left[ \mathbb{E} \sum_{y \in S} [h(y) = h(x)] \right] \\
+        &= \left[ \mathbb{P} \sum_{y \in S} [h(y) = h(x)] \right] \\
+        &\leq |S|\frac{1}{m} = \frac{n}{m} \leq 1.
+    \end{align*}
+\end{center}
+
+\subsubsection*{Upperbound of error of unique signatures}
+Let $x \in S \subseteq U$, $|S| = n$ and $s : U \to [n^3]$ be a universal hash function. The probability of an error (collision) is less than $1/2n$, where $n = |S|$ and $S \subseteq U$. \\
+\textit{\textbf{Proof}} We have
+\begin{center}
+    \begin{align*}
+        \mathbb{P}\left[ \exists \{x, y\} \subseteq S | s(x) = s(y) \right] &\leq \sum_{\{x, y\} \subseteq S} \mathbb{P} [s(x) = s(y)] \\
+        &\leq \frac{\binom{n}{2}}{n^3} \\
+        < \frac{1}{2n}.
+    \end{align*}
+\end{center}
+
+\subsubsection*{Connection between strongly universal and universal}
+Consider distinct keys $x, y \in [u]$, possibly non-distinct hash values $q, r \in [m]$, $h : [u] \to [m]$, and $h(x) = q$ and $h(y) = r$. Then, if $h$ is strongly universal, it is also universal. \\
+\textit{\textbf{Proof}} 
+$$
+\mathbb{P}[h(x) = h(y)] = \sum_{q \in [m]} \mathbb{P} [h(x) = q \wedge h(y) = q] = m/m^2 = 1/m.
+$$
+
+\subsubsection*{Equivalent definitions of strong universality}
+The two equivalent definitions
+\begin{enumerate}
+    \item A random hash function $h : U \to [m]$ is \textit{strongly universal} (aka. $2$\textit{-independent}) if
+    \begin{enumerate}
+        \item Each key is hashed uniformly into $[m]$ (that is, $\forall x \in U, q \in [m] : \mathbb{P}[h(x) = q] = \frac{1}{m})$, and
+        \item Any two distinct keys hash independently.
+    \end{enumerate}
+    \item for all $x \neq y \in U$, and $q, r \in [m]$ we have
+    $$
+    \mathbb{P}[h(x) = q \wedge h(y) = r] = \frac{1}{m^2}.
+    $$
+\end{enumerate}
+are equivalent. \\
+\textit{\textbf{Proof}} First assume strong universality and consider distinct keys $x, y \in U$. For any hash value $q \in [m]$, we have
+$$
+\mathbb{P}[h(x) = q] = \sum_{r \in [m]} \mathbb{P}[h(x) = q \wedge h(y) = r] = \frac{m}{m^2} = \frac{1}{m},
+$$
+so $h(x)$ is uniform in $[m]$, and the same holds for $h(y)$. Moreover, for any hash value $r \in [m]$,
+\begin{center}
+    \begin{align*}
+        \mathbb{P}[h(x) = q | h(y) = r] &= \frac{P[h(x) = q \wedge h(y) = r] }{\mathbb{P}[h(y) = r]} \\
+        &= \frac{1/m^2}{1/m} = \frac{1}{m} = \mathbb{P}[h(x) = q],
+    \end{align*}
+\end{center}
+so $h(x)$ is independent of $h(y)$. For the converse direction, when $h(x)$ and $h(y)$ are independent we have
+$$\mathbb{P}[h(x) = q \wedge h(y) = r] = \mathbb{P}[h(x) = q] \cdot \mathbb{P}[h(y) = r],$$ 
+and when $h(x)$ and $h(y)$ are uniform we have
+$$
+\mathbb{P}[h(x) = q] = \mathbb{P}[h(y) = r] = \frac{1}{m}
+$$
+so $\mathbb{P}[h(x) = q] \cdot \mathbb{P}[h(y) = r] = \frac{1}{m^2}.$
+
 \clearpage
 
 \section*{Van Emde Boas Trees}
 \subsection*{General Knowledge}
+Van Emde Boas trees support \texttt{MEMBER}, \texttt{INSERT}, \texttt{DELETE}, \texttt{MINIMUM}, \texttt{MAXIMUM}, \texttt{SUCCESSOR}, and \texttt{PREDECESSOR} in $O(\lg \lg u)$ worst-case time. The hitch is that the keys must be integers in the range $0$ to $u-1$, with no duplicates allowed.  We call the set $\{0, 1, ..., u - 1\}$ the \textit{\textbf{universe}} of values that can be stored and $u$ \textit{\textbf{universe size}}. We assume that $u$ is an exact power of $2$.
+\\
+\\
+To allow $u$ to be able to be of the form $2^{2k + 1}$, we let 
+$$\sqrt[\uparrow]{u} = 2^{\left \lceil (\lg u)/2 \right \rceil}$$
+and
+$$\sqrt[\downarrow]{u} = 2^{\left \lfloor (\lg n)/2 \right \rfloor}.$$
+Then we define the following functions
+\begin{enumerate}
+    \item $high(x) = \left \lfloor \frac{x}{\sqrt[\downarrow]{u}} \right \rfloor$: The high half of $x$'s bits
+    \item $low(x) = x \text{ mod } \sqrt[\downarrow]{u}$: The low half of $x$'s bits
+    \item $index(x, y) = x \sqrt[\downarrow]{u} + y$: The value of element at cluster $x$ index $y$.
+\end{enumerate}
+NOTE: we expect $x$ to have $\sqrt{u}$ bits. e.g. for $u = 16$ we have $2 = 0b0010$, even though the first two bits does not add anything they are still important for computing $high$ and $low$.
+\\
+\\
+Each node in the van Emde Boas tree has the following structure:
+\begin{itemize}
+    \item A field $vEB(u)$ denoting the universe size $u$
+    \item A field $min$ that stores the minimum element in the vEB tree
+    \item A field $Max$ that stores the maximum element in the vEB tree
+    \item A field $Summary$ that points to a summary node, that shows shows whether other clusters contains any elements.
+    \item An array $cluster$ of pointers that points to sub-vEB trees, each of size $\sqrt{u}$.
+\end{itemize}
+However, if $u = 2$, then it only has $vEB(u)$, $min$ and $max$.
+\\
+\\
+The element stored in $min$ is not stored in any of the clusters. Unless the vEB tree contains just one element the element stored in $\max$ is stored in the clusters.
+\\
+\\
+We can tell whether a vEB tree has $0$ elements, $1$ element or more elements in constant time from its $min$ and $max$ values. If $min = max = NIL$, then it has no elements. If $min = max \neq NIL$, then it has $1$ element. If $NIL \neq min \neq max$, then it has two or more elements.
+Before using a van Emde Boas tree, we must know the universe size $u$, so that we can create a van Emde Boas tree of the appropriate size that initially represents an empty set. The total space requirement of a van Emde Boas tree is $O(u)$, and we can create an empty tree in $\Theta(u)$. 
+\\
+\\
+The recursive procedures that implement the vEB-tree operations will all have running times characterized by the recurrence
+$$
+T(u) \leq T(\sqrt[\uparrow]{u}) + O(1).
+$$
+Letting $m = \lg u$, we rewrite it as
+$$
+T(2^m) \leq T(2^{\lfloor m/2 \rfloor}) + O(1).
+$$
+Noting that $\lfloor m/2 \rfloor \leq 2m/3$ for all $m \geq 2$, we have
+$$
+T(2^m) \leq T(2^{2m/3}) + O(1).
+$$
+Letting $S(m) = T(2^m)$, we rewrite this last recurrence as
+$$
+S(m) \leq S(2m/3) + O(1),
+$$
+which, by case $2$ of the master method, has the solution $S(m) = O(\lg m) = O(\lg \lg u)$.
+
+\begin{algorithm}[htbp]
+    \caption{vEB-TREE-MEMBER}
+    \begin{algorithmic}[1]
+        \Require vEB tree $V$
+        \Require Key to search for $x$
+        \If{$x == V.min$ or $x == V.max$}
+            \State \textbf{return} True
+        \ElsIf{$V.u == 2$}
+            \State \textbf{return} False
+        \Else
+            \State \textbf{return} \texttt{vEB-TREE-MEMBER}($V.cluster[high(x)], low(x)$)
+        \EndIf
+    \end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[htbp]
+    \caption{vEB-TREE-SUCCESSOR}
+    \begin{algorithmic}[1]
+        \Require vEB tree $V$
+        \Require Key to find successor of $x$
+        \If{$V.u == 2$}
+            \If{$x == 0$ and $V.max == 1$}
+                \State \textbf{return} 1
+            \Else
+                \State \textbf{return} $NIL$
+            \EndIf
+        \ElsIf{$V.min \neq NIL$ and $x < V.min$}
+            \State \textbf{return} $V.min$
+        \Else
+            \State $max-low =V.cluster[high(x)].max$
+            \If{$max-low \neq NIL$ and $low(x) < max-low$}
+                \State $offset = $\texttt{vEB-TREE-SUCCESSOR}($V.cluster[high(x)], low(x)$)
+                \State \textbf{return} $index(high(x), offset)$
+            \Else
+                \State $succ-cluster = $\texttt{vEB-TREE-SUCCESSOR}($V.summary, high(x)$)
+                \If{$succ-cluster == NIL$}
+                    \State \textbf{return} $NIL$
+                \Else
+                    \State $offset = V.cluster[succ-cluster].min$
+                    \State \textbf{return} $index(succ-cluster, offset)$
+                \EndIf
+            \EndIf
+        \EndIf
+    \end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[htbp]
+    \caption{vEB-TREE-PREDECESSOR}
+    \begin{algorithmic}[1]
+        \Require vEB tree $V$
+        \Require Key to find predecessor of $x$
+        \If{$V.u == 2$}
+            \If{$x == 0$ and $V.max == 1$}
+                \State \textbf{return} 1
+            \Else
+                \State \textbf{return} $NIL$
+            \EndIf
+        \ElsIf{$V.min \neq NIL$ and $x < V.min$}
+            \State \textbf{return} $V.min$
+        \Else
+            \State $max-low = V.cluster[high(x)].max$
+            \If{$max-low \neq NIL$ and $low(x) < max-low$}
+                \State $offset = $\texttt{vEB-TREE-PREDECESSOR}($V.cluster[high(x)], low(x)$)
+                \State \textbf{return} $index(high(x), offset)$
+            \Else
+                \State $pred-cluster = $\texttt{vEB-TREE-PREDECESSOR}($V.summary, high(x)$)
+                \If{$pred-cluster == NIL$}
+                    \If{$V.min \neq NIL$ and $x > V.min$}
+                        \State \textbf{return} $V.min$
+                    \Else
+                        \State \textbf{return} $NIL$
+                    \EndIf
+                \Else
+                    \State $offset = V.cluster[pred-cluster].min$
+                    \State \textbf{return} $index(pred-cluster, offset)$
+                \EndIf
+            \EndIf
+        \EndIf
+    \end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[htbp]
+    \caption{vEB-TREE-INSERT}
+    \begin{algorithmic}[1]
+        \Require vEB tree $V$
+        \Require Key to insert $x$
+        \If{$V.min == NIL$}
+            \State $V.min = V.max = x$
+        \Else
+            \If{$x < V.min$}
+                \State Swap $x$ and $V.min$
+            \EndIf
+            \If{$V.u > 2$}
+                \If{$V.cluster[high(x)].min==NIL$}
+                    \State \texttt{vEB-TREE-INSERT($V.summary, high(x)$)}
+                    \State \texttt{vEB-EMPTY-TREE-INSERT}($V.cluster[high(x)], low(x)$)
+                \Else 
+                    \State $V.cluster[high(x)].min = V.cluster[high(x)].max = low(x)$
+                \EndIf
+            \EndIf
+            \If{$x > V.max$}
+                $V.max = x$
+            \EndIf
+        \EndIf
+    \end{algorithmic}
+\end{algorithm}
+
+
+\begin{figure}
+    \centering
+    \includegraphics[width = \textwidth]{entities/vEB.png}
+\end{figure}
+
 \clearpage
 \subsection*{Proofs}
 \clearpage
@@ -627,18 +908,352 @@ Thus, the probability of finding $C$ can then by found by
 
 \section*{NP-Completeness}
 \subsection*{General Knowledge}
+We shall refer to three classes of problems:
+\begin{itemize}
+    \item P: Problems that can be solved in time $O(n^k)$ for some constant $k$, where $n$ is the size of the input to the problem
+    \item NP: problems that are "verifiable" in polynomial time. Any problem in P is also in NP, since if a problem is in P then we can solve it in polynomial time.
+    \item NPC/Np-Complete: Problems that are in NP and are as "hard" as any problem in NP. 
+\end{itemize}
+When we demonstrate that a problem is NP.complete, we are making a statement about how hard it is (or at least how hard we think it is), rather than about how easy it is. We are not trying to prove the existence of an efficient algorithm, but instead that no efficient algorithm is likely to exist. We rely on three key concepts in showing a problem to be NP-complete
+\begin{enumerate}
+    \item \textit{Decision problems vs. opitmization problems}: Many problems of interest are \textit{\textbf{optimization problems}}, in which each feasible solution has an associated value, and we wish to find a feasible solution with the best value. NP-completeness applies directly not to opimization problems, however, but to \textit{\textbf{decision problems}}, in which the answer is simply "yes" or "no". If we can provide evidence that a decision problem is hard,we also provide evidence that its related optimization problem is hard.
+    \item \textit{Reductions}: Let us consider a decision problem $A$, which we would like to solve in polynomial time. We call the input to a particular problem an \textit{\textbf{instance}} of that problem. Now suppose that we already know how to solve a different decision problem $B$ in polynomial time. Finally, suppose that we have a procedure that transforms any instance $\alpha$ of $A$ into some instance $\beta$ $B$ with the following characteristics:
+    \begin{itemize}
+        \item The transformation takes polynomiaal time
+        \item The answers are the same
+    \end{itemize}
+    We call such procedure a polynomial-time \textit{\textbf{reduction algorithm}} and it provides us a way to solve problem $A$ in polynomial time. As long as this takes polynomial time, we have a way to decide $\alpha$ in polynomial time. We use polynomial-time reductions in the opposite way to show that a problem is NP-complete. For NP-completeness, we cannot assume that there is no polynomial-time algorithm for problem $A$. However, we can prove that problem $B$ is NP-complete on the assumption that problem $A$ is also NP-complete.
+    \item \textit{A first NP-complete problem}: Because the technique of reduction relies on having a problem already known to be NP.complete in order to prove adifferent problem NP-complete, we need a "first" NP-complete problem. The problem we shall use is the \textit{circuit-satisfiabilitty problem}
+\end{enumerate}
+We define an \textit{\textbf{abstract problem}} $Q$ to be a binary relation on a set $I$ of problem \textit{\textbf{instances}} and a set $S$ of problem \textit{\textbf{solutions}}. As we saw above, the theory of NP-completenss restricts attention to \textit{\textbf{decision problems}}: those having a yes/no solution. In this case, we can view an abstract decision problem as a function that maps the instance set $I$ to the solution set $\{0, 1\}$. Many abstract problems are not decision problems, but rather \textit{\textbf{optimization problems}}. As we saw above, however, we can usually recast an optimization problem as a decision problem that is no harder.
+\\
+\\
+An \textit{\textbf{encoding}} of a set $S$ of abstract objects is a mapping $e$ from $S$ to the set of binary strings. Polygons, graphs, functions, ordered pairs, programs - all can be encoded as binary strings. Thus, a computer algorithm that "solves" some abstract decision problem actually takes an encoding of a problem instance as input. We call a problem whose instance set is the set of binary strings a \textit{\textbf{concrete problem}}. We say that an algorithm \textit{\textbf{solves}} a concrete problem in time $O(T(n))$ if, when it is provided a problem instance $i$ of length $n = |i|$, the algorithm can produce the solution in $O(T(n))$ time. A concrete problem is \textit{\textbf{polynomial-time solvable}}, therefore, if there exists an algorithm to solve it in time $O(n^k)$ for some constant $k$.
+\\
+\\
+We can now formally define the \textit{\textbf{complexity class P}} as the set of concrete decision problems that are polynomial-time solvable.
+\\
+\\
+We can use encodings to map abstract problems to concrete problems. Given an abstract decision problem $Q$ mapping an instance set $I$ to $\{0, 1\}$, an encoding $E : I \to \{0, 1\}^*$ can induce a related concrete decision problem, which we denote by $e(Q)$. If the solution to an abstract-problem instance $i \in I$ is $Q(i) \in \{0, 1\}$, then the solution to the concrete-problem instance $e(i) \in \{0, 1\}^*$ is also $Q(i)$.
+\\
+\\
+Suppose that an integer $k$ is to be provided as the sole input to an algorithm, and suppose that the running time of the algorithm is $\Theta(k)$. If the integer $k$ is provided in unary, then the running time of the algorithm is $O(n)$ on length-$n$ inputs, which is polynomial time. If we use binary representation of the integer $k$, however, then the input length is $n = \lfloor \lg k \rfloor + 1$. In this case, the running time of the algorithm is $\Theta(k) = \Theta(2^n)$. Thus, depending on the encoding, the algorithm runs in either polynomial or superpolynomial time.
+\\
+\\
+We say that a function $f : \{0, 1\}^* \to \{0, 1\}^*$ is \textit{\textbf{polynomial-time computable}}  if there exists a polynomial-time algorithm $A$ that, given any input $x \in \{0, 1\}^*$, produces as output $f(x)$. For some set $I$ of problem instances, we say that two encodings $e_1$ and $e_2$ are \textit{\textbf{polynomially related}} if there exist two polynomial-time computable functions $f_{12}$ and $f_{21}$ such that for any $i \in I$, we have $f_{12}(e_1(i)) = e_2(i)$ and $f_{21}(e_2(i)) = e_(i)$. If two encodings $e_1$ and $e_2$ of an abstract problem are polynomially related, whether the problem is polynomial-time solvable or not is independent of which encoding we use. Thus, whether an abstract problem has its instances encoded in binary or base 3 does not affect whether it is polynomial-time solvable or not, but if instances are encoded in unary, its complexity may change. To denote the standard encoding of an object, we sehall enclose the object in angle braces. Thus, $\langle G \rangle$ denotes the standard encoding of a graph $G$.
+\\
+\\
+An \textit{\textbf{alphabet}} $\Sigma$ is a finite set of symbols. A \textit{\textbf{language}} $L$ over $\Sigma$ is any set of strings made up of symbols from $\Sigma$. We denote the \textit{\textbf{empty string}} by $\varepsilon$, the \textit{\textbf{empty language}} by $\emptyset$, and the language of all strings over $\Sigma$ by $\Sigma^*$.
+\\
+\\
+From the point of view of language theory, the set of instances for any decision problem $Q$ is simply the set $\Sigma^*$, where $\Sigma = \{0, 1\}$. Since $Q$ is entirely characterized by those problem instances that produce a $1$ answer, we can view $Q$ as a language $L$ over $\Sigma = \{0, 1\}$, where
+$$
+L = \{x \in \Sigma^* : Q(x) = 1\}.
+$$
+For example, the decision problem PATH has the corresponding language
+\begin{center}
+    \begin{align*}
+        PATH = \{\langle G, u, v, k \rangle \text{ : } & G = (V, E) \text{ is an undirected graph}, \\
+        &u, v \in V \\
+        & k \geq 0 \text{ is an integer, and} \\
+        &\text{there exists a path from } u \text{ to } v \text{ in } G \text{ consisting of at most } k \text{ edges.} \}.
+    \end{align*}
+\end{center}
+We say that an algorithm $A$ \textit{\textbf{accepts}} a string $x \in \{0, 1\}^*$ if, given input $x$, the algorithm's output $A(x)$ is $1$. The language \textit{\textbf{accepted}} by an algorithm $A$ is the set of strings $L = \{x \in \{0, 1\}^* : A(x) = 1\}$.
+\\
+\\
+A language $L$ is \textit{\textbf{decided}} by an algorithm $A$ if every binary string in $L$ is accepted by $A$ and every binary string not in $L$ is rejected by $A$. A language $L$ is \textit{\textbf{accepted in polynomial time}} by an algorithm $A$ if it is accepted by $A$ and if in addition there eixsts a constant $k$ such taht for any length-$n$ string $x \in L$, algorithm $A$ accepts $x$ in time $O(n^k)$. A language $L$ is \textit{\textbf{decided in polynomial time}} by an algorithm $A$ if there eixsts a constant $k$ such that for any length-$n$ string $x \in \{0, 1\}^*$, the algorithm correctly decides whether $x \in L$ in time $O(n^k)$.
+\\
+\\
+Using this language-theoretic framework, we can provide an alternative definition of the complexity class $P$:
+$$
+P = \{L \subseteq \{0, 1\}^* : \text{ there exists and algorithm } A \text{ that decides } L \text{ in polynomial time}\}.
+$$
+In fact, $P$ is also the class of languages that can be accepted in polynomial time.
+\\
+\\
+We define a \textit{\textbf{verfirication algorithm}} as being a two-argument algorithm $A$, where one argument is an ordinary input string $x$ and the other is a binary string $y$ called a \textit{\textbf{certificate}}. A two-argument algorithm $A$ \textit{\textbf{verifies}} an input string $x$ if there exists a certificate $y$ such that $A(x, y) = 1$. The \textit{\textbf{language verified}} by a verification algorithm $A$ is
+$$
+L = \{x \in \{0, 1\}^* : \text{ there exists } y \in \{0, 1\}^* \text{ such that } A(x, y) = 1\}.
+$$
+Intuitively, an algorithm $A$ verifies a language $L$ if for any string $x \in L$, there exists a certificate $y$ that $A$ can use to prove that $x \in L$. Moreoever, for any string $x \notin L$, there must be no certificate proving that $x \in L$.
+\\
+\\
+The \textit{\textbf{complexity class NP}} is the class of languages that can be verified by a polynomiial-time algorithm. More precisely, a language $L$ belongs to NP iff thereexist a two-input polynomial-time algorithm $A$ and a constant $c$ such that
+$$
+L = \{x \in \{0, 1\}^* : \text{ there exists a certificate } y \text{ with } |y| = O(|x|^c) \text{ such that } A(x, y) = 1\}.
+$$
+We say that algorithm $A$ \textit{\textbf{verifies}} language $L$ in \textit{\textbf{polynomial time}}.
+\\
+\\
+Intuitively, a problem $Q$ can be reduced to another problem $Q'$ if any instance of $Q$ can be "easily rephrased" as an instance of $Q'$, the solution to which provides a solution to the instance of $Q$. Returning to our formal-language framework for decision problems, we say that a language $L_1$ is \textit{\textbf{polynomial-time reducible}} to a language $L_2$, written $L_1 \leq_p L_2$, if there exists a polynomial-time computable function $f : \{0, 1\}^* \to \{0, 1\}^*$ such that for all $x \in \{0, 1\}^*$,
+$$
+x \in L_1 \text{ iff } f(x) \in L_2.
+$$
+We call the function $f$ the \textit{\textbf{reduction function}}, and a polynomial-time algorithm $F$ that computes $f$ is a \textit{\textbf{reduction algorithm}}.
+\\
+\\
+We can now define the set of NP-complete languages, which are the hardest problems in NP. A language $L \subseteq \{0, 1\}^*$ is \textit{\textbf{NP-complete}} if
+\begin{enumerate}
+    \item $L \in NP$, and
+    \item $L' \leq_p L$ for every $L' \in NP$
+\end{enumerate}
+If a language $L$ satisfies property $2$, but not necessarily property $1$, we say that $L$ is \textit{\textbf{NP-hard}}. We also define NPC to be the class of NP-complete language.
+\\
+\\
+The \textit{\textbf{circuit-satisfiability problem}} is "Given a boolean combinational circuit composed of AND, OR and NOT gates, is it satisfiable - that is, does it have a truth assignment that causes the output of the circuit to be $1$".
+\\
+\\
+In order to pose this question formally, however, we must agree on a standard encoding for circuits. The \textit{\textbf{size}} of a boolean combinational circuit it the number of booleam combinational elements plus the number of wires in the circuit. We could devise a graphlike encoding that maps any given circuit $C$ into a binary string $\langle C \rangle$ whose length is polynomial in the size of the circuit itself. As a formal language, we can therefore define
+$$
+CIRCUIT-SAT = \{\langle C \rangle : C \text{ is a satisfiable boolean combinational circuit}\}.
+$$
+There is strong evidence that no polynomial-time algorithm exists that solves the circuitsatisfiability problem.
+\\
+\\
+We can prove that a language $L$ is NP-complete by
+\begin{enumerate}
+    \item Prove $L \in NP$
+    \item Select a known NP-complete language $L'$
+    \item Describe an algorithm that computes a function $f$ mapping every instance $x \in \{0, 1\}^*$ of $L'$ to an instance $f(x)$ of $L$
+    \item Prove that the function $f$ satisfies $x \in L'$ iff $f(x) \in L$ for all $x \in \{0, 1\}^*$
+    \item Prove that the algorithm computing $f$ runs in poylnomial time.
+\end{enumerate}
+We formulate the \textit{\textbf{(formula) satisfiability}} problem in terms of the language SAT as follows. An instance of SAT is a boolean formula $\phi$ composed of
+\begin{enumerate}
+    \item $n$ boolean variables: $x_1, x_2, ..., x_n$
+    \item $m$ boolean connectivies: any boolean function with one or two inputs and one output
+    \item parentheses.
+\end{enumerate}
+We can easily encode a boolea formula $\phi$ in a length that is polynomial in $n + m$. As in boolea combinational circuits, a \textit{\textbf{truth assignment}} for a boolean formula $\phi$ is a set of values for the variables of $\phi$, and a \textit{\textbf{satisfying assignment}} is a truth assignment that causes it to evaluate to $1$. A formula with a satisfying assignment is a \textit{\textbf{satisfiable}} formula. The satisfiability problem asks whether a given boolean formula is satisfiable; in formal-language terms
+$$
+SAT = \{\langle \phi \rangle : \phi \text{ is a satisfiable boolean formula}\}.
+$$
+The naive algorithm to determine whether an arbitrary boolean formula is satisfiable does not run in polynomial time. A formula with $n$ variables has $2^n$ possible assignments. If the length of $\langle \phi \rangle$ is polynomial in $n$, then checking every assignment requires $\Omega(2^n)$ time, which is superpolynomial in the length of $\langle \phi \rangle$.
+\\
+\\
+We define $3-CNF$ satisfiability using the following terms. A \textit{\textbf{literal}} in a boolean formula is an occurence of a variable or its negation. A boolean formula is in \textit{\textbf{conjunctive normal form}}, or \textbf{\textit{CNF}}, if it is expressed as an AND of \textit{\textbf{clauses}}, each of which is the OR of one or more literals. A boolean formula is in \textit{\textbf{3-conjunctive normal form}}, or \textit{\textbf{3-CNF}}, if each clause has exactly three distinct literals. For example, the boolean formula
+$$
+(x_1 \vee \neg x_1 \vee \neg x_2) \wedge (x_3 \vee x_2 \vee x_4) \wedge (\neg x_1 \vee \neg x_3 \vee \neg x_4)
+$$
+is in $3-CNF$. In $3-CNF-SAT$, we are asked whether a given boolean formula $\phi$ in $3-CNF$ is satisfiable. A polynomial-time algorithm that can determine the satisfiability of boolean formulas is unlikely to exist.
+\\
+\\
+A \textit{\textbf{clique}} in an undirected graph $G = (V, E)$ is a subset $V' \subseteq V$ of vertices, such that all vertices are adjacent to each other. The \textit{\textbf{size}} of a clique is the number of vertices it contains. The \textit{\textbf{clique problem}} is the optimization problem of finding a clique of maximum size in a graph. As a decision problem, we ask whether a clique of a given size $k$ exists in the graph. The formal definition is
+$$
+CLIQUE = \{\langle G, k \rangle : G \text{ is a graph containing a clique of size } k\}.
+$$
+A naive algorithm for determining whether a graph with $|V|$ vertices has a clique of size $k$ is to list all $k$-subsets of $V$, and check each one to see whether it forms a clique. The running time of this algorithm is $\Omega(k^2 \binom{|V|}{k})$, which is polynomial if $k$ is a constant. In general, however, $k$ could be near $\frac{|V|}{2}$, in which case the algorithm runs in superpolynomial time. Indeed, an efficient algorithm for the clique problem is unlikely to exist.
+\\
+\\
+A \textit{\textbf{vertex cover}} of an undirected graph $G = (V, E)$ is a subset $V' \subseteq V$ such taht if $(u, v) \in E$, then $u \in V'$ or $v \in V'$ (or both). That is, each vertex "covers" it incident edges, and a vertex cpver for $G$ is a set of vertices that covers all the edge in $E$. The \textit{\textbf{size}} of a vertex cover is the number of certices in it. The \textit{\textbf{vertex-cover problem}} is to find a vertex cover of minimum size in a given graph. Restating this optimization problem as a decision problem, we wish to determine whether a graph has a vertex cover of a given size $k$. As a language we define
+$$
+VERTEX-COVER = \{\langle G, k \rangle : G \text{ is a graph containing a vertex cover of size } k\}.
+$$
+\\
+\\
+A \textit{\textbf{hamiltionian cycle}} of an undirected graph $G = (V, E)$is a simple cycle that contains each vertex in $V$. We can define the \textit{\textbf{hamiltonian-cycle problem}}, "Does a graph $G$ have a hamiltionian cycle?", as a formal language
+$$
+HAM-CYCLE = \{\langle G \rangle : G \text{ is a hamiltonian graph}\}.
+$$
+\\
+\\
+In the \textit{\textbf{traveling-salesman problem}} a salesman must visit $n$ cities. Modeling the problem as a complete graph with $n$ vertices, we can say that the salesman wishes to make a \textit{\textbf{tour}} visiting each city exactly once and finishing at the city he starts from. The salesman incurs a nonnegative integer cost $c(i, j)$ to travel from city $i$ to city $j$, and the salesman wishes to make the tour whose total cost i minimum, where the total cost is the sum of the individial costs along the edges of the tour. The formal language for the corresponding decision problem is
+\begin{center}
+    \begin{align*}
+        TSP = \{\langle G, c, k \rangle : &G = (V, E) \text{ is a complete graph} \\
+        &c \text{ is a function from } V \times V \to \mathbb{N} \\
+        k \in \mathbb{N}\\
+        &G \text{ has a traveling-salesman tour with cost at most } k.\}
+    \end{align*}
+\end{center}
+A fast algorithm for the traveling salesman problem is unlikely to exist.
+\\
+\\
+In the \textit{\textbf{subset-sum problem}}, we are given a finite set $S$ of positive integers and an integer \textit{\textbf{target}} $t > 0$. We ask wehter there exists a subset $S' \subseteq S$ whose elements sum to $t$. As usual we define the problem as a language
+$$
+SUBSET-SUM = \{\langle S, t \rangle : \text{ there exists a subset } S' \subseteq S \text{ such that } t = \sum_{s \in S'} s\}.
+$$
+It is important to recall that our standard encoding assumes that the input integers are coded in binary. With this assumption in mind, we can show that the subset-sum problem is unlikely to have a fast algorithm.
+
 \clearpage
 \subsection*{Proofs}
-\clearpage
-\subsection*{Examples}
+\subsubsection*{Lemma 34.1}
+Let $Q$ be an abstract decision proble on an instance set $I$, and let $e_1$ and $e_2$ be polynomially related encodings on $I$. Then, $e_1(Q) \in P$ iff $e_2(Q) \in P$. \\
+\textit{\textbf{Proof}} Not done
+
+\subsubsection*{Theorem 34.2}
+$$
+P = \{L : L \text{ is accepted by a polynomial-time algorithm}\}
+$$
+\textit{\textbf{Proof}} Not done.
+
+\subsubsection*{Lemma 34.3}
+If $L_1$, $L_2 \subseteq \{0, 1\}^*$ are languages such that $L_1 \leq_p L_2$, then $L_2 \in P$ implies $L_1 \in P$. \\
+\textit{\textbf{Proof}} Not done
+
+\subsubsection*{Theorem 34.4}
+If any NP-complete problem is polynomial-time solvable, then $P = NP$. Equivalently, if any problem in NP is not polynomial-time solvable, thene no NP-complete problem is polynomial-time solvable. \\
+\textit{\textbf{Proof}} Not done
+
+\subsubsection*{Lemma 34.5}
+The circuit-satisfiability problem belongs to the class $NP$.\\
+\textit{\textbf{Proof}} Not done
+
+\subsubsection*{Lemma 34.6}
+The circuit-satisfiability problem is NP-hard.\\
+\textit{\textbf{Proof}} Not done
+
+\subsubsection*{Lemma 34.8}
+If $L$ is a language such that $L' \leq_p L$ for some $L' \in NPC$, then $L$ is NP-hard. If, in addition, $L \in NPC$, then $L \in NPC$.\\
+\textit{\textbf{Proof}} Not done
+
+\subsubsection*{Theorem 34.9}
+Satisfiability of boolean formulas is NP-complete. \\
+\textit{\textbf{Proof}} Not done
+
+\subsubsection*{Theorem 34.10}
+Satisfiability of boolean formulas in 3-conjunctive normal form is NP-complete. \\
+\textit{\textbf{Proof}} Not done
+
+\subsubsection*{Theorem 34.11}
+The clique problem is NP-complete. \\
+\textit{\textbf{Proof}} Not done
+
+\subsubsection*{Theorem 34.12}
+The vertex-cover problem is NP-complete. \\
+\textit{\textbf{Proof}} Not done
+
+\subsubsection*{Theorem 34.13}
+The hamiltonian cycle problem is NP-complete. \\
+\textit{\textbf{Proof}} Not done
+
+\subsubsection*{Theorem 34.14}
+The traveling salesman problem is NP-complete. \\
+\textit{\textbf{Proof}} Not done
+
+\subsubsection*{Theorem 34.15}
+The subset-sum problem is NP-complete. \\
+\textit{\textbf{Proof}} Not done
+
 \clearpage
 
 \section*{Exact Exponential Algorithms and Parameterized Complexity}
 \subsection*{General Knowledge}
+For functions $f$ and $g$ we write $f(n) = O^*(g(n))$ if $f(n) = O(g(n) poly(n))$, where $poly(n)$ is a polynomial.
+\\
+\\
+In \textit{Ecat exponential algorithm} we find an exact solution for all instances in superpolynomial time. In \textit{paramerized algorithms} we find an exact solution in polynomial time for only some instances.
+\\
+\\
+In the \textit{Travelling salesman problem} (TSP) we are given as et of distinct cities $\{c_1, c_2, ..., c_n\}$ and for each pair $c_i \neq c_j$ the distance between $c_i$ and $c_j$, denoted by $d(c_i, c_j)$. The task is to construct a tour of the travelling salesman of minimum total length which visits all the cities and returnsr to the starting point.
+\\
+\\
+How to find a tour of minimum length? The easy way is to generate all possible solutions. Thus a naive approach here requires at least $n!$ steps. Using dynamic programming one obtains a much faster algorithm.
+\\
+\\
+In the dynamic programming algorithm for TSP define
+$$
+OPT[S, c_i] = "\text{path of minimum length that starts in } c_1 \text{, visits all of } S \text{ once, and end in } c_i
+$$
+for all $S \subseteq \{c_2, ..., c_n\}$ and $c_i \in S$. Then 
+$$
+\min\{\text{OPT}[\{c_2, ..., c_n\}, c_i ] + d(c_i, c_1) | c_i \in \{c_2, ..., c_n\}\}
+$$
+is the length of the minimal tour. Thus, we have
+\begin{center}
+    \begin{math}
+        OPT[S, c_i] = 
+        \begin{cases}
+            d(c_1, c_i) & \text{if } s = \{c_i\} \\
+            \min \{ OPT[S \backslash \{c_i\}, c_k] + d(c_k, c_i) | c_k \in S \backslash \{c_i\} \} & \text{if } \{c_i \} \subset S.
+        \end{cases}
+    \end{math}
+\end{center}
+The corresponding algorithm using dynamic programming for this computes $O(n^2 \cdot 2^n)$ shortest paths.
+\\
+\\
+In the \textit{Maximum Independent Set Problem} (MIS), we are given an undirected graph $G = (V, E)$. The task is to find an independent set $I \subseteq V$, i.e. any pair of vertices of $I$ is non-adjacent, of maximum cardinality. The naive approach is to just try all $2^n$ subsets. This takes $O^*(2^n)$ time. 
+\\
+\\
+Here we present a simple branching algorithm for MIS. If a vertex $v$ is in an independent set $I$, then none of its neighbors can be in $I$. On the other hand, if $i$ is a maximum indepndent set, and thus if $v$ is not in $I$ then at least one of its neighbors is in $I$. This is because otherwise $I \cup \{v\}$ would be an independent set, which contradicts the maximality of $I$. Thus for every vertex $v$ and every maximal independent set $I$, there is a vertex $y$ from the closed neighborhood $N[v] = \{v\} \cup \{w \in V | (v, w) \in E\}$ of $v$, which is the set consisting of $v$ and vertices adjacent to $v$, such that $y$ is in $I$, and no other vertex from $N[y]$ is in $I$. Therefore to solve the problem on $G$, we solve problems on different reduced instances, and then pick up the best of the obtained solutions.
+\\
+\\
+The algorithm exploits this idea. We pick a vertex of minimum degree and for each vertex from its closed neighborhood we consider a subproblem, where we assume that this vertex belongs to a maximum independent set.
+\\
+\\
+Let $T(n)$ be the maximum number of subproblems considered by the branching algorithm on a graph with $n$ vertices, then $T(n) = O(3^{n/3})$.
+\\
+\\
+A \textit{vertex cover} $C$ of a graph $G$ is a set of vertices that includes at least one endpoint of every edge of the graph. The $k$\textit{-vertex cover problem} asks whether it is possible to have $|C| \leq k$. $C$'s complement $V \backslash C$ is an independent set of size $n - k$. This can also be seen as the job of a bouncer who wants to block at most $k$ of the $n$ poeple at the door to prevent fights. If that enough to prevent fights, and if so, who should be blocked? 
+\\
+\\
+The $k$-vertex cover problem is NP-complete. One could just brute-force it by trying all $2^n$ subsets of vertices, which runs in $O(2^k)$, which can be optimized by considering every $v \in V$ and do the following
+\begin{itemize}
+    \item If $d(v) = 0$ then we let $v$ in and drop $v$ from $G$, because $v$ does not have any conflicts
+    \item If $d(v) \geq k + 1$, then we decrease $k$ by $1$, remove $v$ from $G$ and reject $v$, since if we were not to do this, then we would have to reject all of $v$'s $>k$ neighbors instead, which would contradict our goal of having rejecting most $k$ people.
+\end{itemize}
+Once done we know, that all vertices who has not yet been rejected or accepted will have at most $k$ neighbors and at least $1$ neighbor. If $|E| > k^2$, then there is no solution, since each rejection resolves at most $k$ conflicts. This procedure reduces the graph to having $|V| \leq 2k^2$, because
+$$
+|V| = \sum_{v \in V} 1 \leq \sum_{v \in V} d(v) = 2 |E| \leq 2k^2.
+$$
+We can then just brute-force the remaining graph by trying all $\binom{2k^2}{k}$ subsets of $k$ people.
+\\
+\\
+We can now introduce a new idea: if a vertice $v \in V$ only has one neighbor $w \in V \backslash v$, then we remove $v, w$ from $H$, decrease $k$ by $1$ and add $w$ to $C$. This is because we know, that $w$ cannot have less neighbors than $v$ and we cannot use both $v$ and $w$. This results in a graph with $|V| \leq k^2$ vertices, because
+$$
+|V| = \sum_{v \in V} 1 = \frac{1}{2} \sum_{v \in V} 2 \leq \frac{1}{2} \sum_{v \in V} d(v) = |E| \leq k^2
+$$
+We can then brute-force the remaining graph by trying all $\binom{k^2}{k}$ subsets of $k$ people.
+\\
+\\
+Therefore, instead of using brute force to go through an enormous search space, we use simple observations to reduce the search space to a manageable size. This algorithmic technique, using reduction rules to decrease the size of the instance, is called \textit{kernelization}. The general idea is to use the parameter $k$ to quickly reduce to a smaller subproblem of the same type, whose size ideally depends only on $k$ and not on $n$.
+\\
+\\
+Thus, we have shown taht if there is a solution for a given $k$ and a given graph $G$ with $n$ vertices and $m$ edges, then we can find a kernel $H$ with at most $k^2$ vertices. Furthermore, such a kernel can be found in $O(m + n)$ time, and checking if a given subset of size at most $k$ is a solution can be done in $O(k^2)$ time. Thus, for any fixed $k$, the total running time of this algorithm is
+$$
+O(m + n + \binom{k^2}{k} k^2).
+$$
+This can be improved further by using a Bounded Search Tree. The important observation here is, that for each edge $(u, v) \in E$, at least one of $u, v$ must be rejected. The idea is then to pick an arbitrary edge $(u, v)$, reject $u$ and run the algorithm recursively to check whether the remaining conflicts can be resolved by rejecting at most $k - 1$ guests. If this succeeds you already have a solution. If it fails, then move $u$ back into the undecided list, move $v$ to the reject list and run the algorithm recursively to check whether the remaining conflicts can be resolved by tejecting at most $k - $ additional guests. If this recursive call also fails to find a solution, then you can be sure that there is no way to avoid a fight by rejecting at most $k$ guests.
+\\
+\\
+This procedure results in a recursion tree of depth $k$, thus there is a total of $2^k$ recursive calls. If we start by rejecting all vertices of degree $d(v) \geq k + 1$, the resulting graph has at most $|E| = \frac{1}{2} \sum_{v \in V} d(v) \leq \frac{1}{2} nk$ edges, so constructing each recursive call can be done in $O(nk)$ time. The total running time is then $O(m + nk \cdot 2^k)$.
+\\
+\\
+An important feature of the Bar Fight Prevention problem is the existence of the parameter $k$. The problem of finding the minimum $k$ that works is NP-complete, but for any fixed constant $k$ we have just seen two linear-time algorithms. We say the problem is \textit{parameterized by the parameter k}.
+\\
+\\
+A parameterized problem is \textit{Fixed Parameter Tractable (FPT)} if it has an algorithm with running time $f(k) \cdot n^c$ for some function $f$ and some constant $c \in \mathbb{R}$
+\\
+\\
+A parameterized problem is \textit{Slice-wise Polynomial (XP)} if it has an algorithm with running time $f(k) \cdot n^{g(k)}$ for some function $f, g$. We have $FPT \subset XP$, because we can just let $g(k) = c$.
+\\
+\\
+
+
 \clearpage
 \subsection*{Proofs}
-\clearpage
-\subsection*{Examples}
+\subsubsection*{Lemma of $OPT$}
+We have
+\begin{center}
+    \begin{math}
+        OPT[S, c_i] = 
+        \begin{cases}
+            d(c_1, c_i) & \text{if } s = \{c_i\} \\
+            \min \{ OPT[S \backslash \{c_i\}, c_k] + d(c_k, c_i) | c_k \in S \backslash \{c_i\} \} & \text{if } \{c_i \} \subset S.
+        \end{cases}
+    \end{math}
+\end{center}
+\textit{\textbf{Proof}} Let $e = (c_k, c_i)$ be the last edge on one of the paths. If $k = 1$ we are done. If $k \neq 1$ the shortest length through $e$ must be $OPT[S \backslash \{c_i \}, c_k] + d(c_k, c_i)$. The shortest such path must use the minimum over all $c_k \in S \backslash \{c_i\}$.
+
+\subsubsection*{Lemma of runtime of TSP with dynamic programming}
+The algorithm runs in $O^*(2^n)$. \\
+\textit{\textbf{Proof}} \\
+We have
+$$
+\sum_{j = 2} ^{n - 1} \binom{n-1}{j} \sum_{i = 1} ^j (j - 1) \leq n^2 \sum_{j = 1} ^n \binom{n}{j} = n^2 \cdot 2^n = O^*(2^n)..
+$$
+
 \clearpage
 
 \section*{Approximation Algorithms}
