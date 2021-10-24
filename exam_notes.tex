@@ -149,8 +149,41 @@ $$
 f(S, T) = \sum_{u \in S} \sum_{v \in T} f(u, v) - \sum_{u \in S} \sum_{v \in T} f(v, u).
 $$
 We also have, that $f(S, T) = |f|$.
+\\
+\\
+Let $G = (V, E)$ be a flow network with source $s$ and sink $t$, and let $f$ be a flow in $G$. Let $G_f$ be the residual network of $G$ induced by $f$, and let $f'$ be a flow in $G_f$. Then the function $f \uparrow f'$ is a flow in $G$ with value $|f \uparrow f'| = |f| + |f'|$.
+\\
+\\
+Let $G = (V, E)$ be a flow network, let $f$ be a flow in $G$, and let $p$ be an augmenting path in $G_f$. Let $f_p$ be defined as in equation (\ref{eqn:26.8}), and suppose that we augment $f$ by $f_p$. then the function $f \uparrow f_p$ is a flow in $G$ with value $|f \uparrow f_p| = |f| + |f_p| > |f|$. \\
 
 \section*{Questions they can ask}
+\subsubsection*{Why do we require that antiparallel edges do not exist?}
+I think it is because, that we in the residual network have antiparallel edges. If we then also had antiparallel edges in the flow network, something would probably screw up.
+
+\subsubsection*{How do we handle antiparallel edges?}
+We split one of the edges up into two edges and introduce a new vertex, which connects the two new edges. The capacity of the two new edges is the same as the capacity of the original edge.
+
+\subsubsection*{Why do we have flow going in the wrong direction in the residual network?}
+Sending flow back along an edge is equivalent to decreasing the flow on the edge, which is a necessary operation in many algorithms
+
+\subsubsection*{Does the algorithm always terminate?}
+No. The Ford-Fulkerson method might fail if edge capacities are irrational numbers.
+
+\subsubsection*{What is the running time of the algorithm?}
+This depends on how we find the augmenting path. If we assume that the capacities are integers, then Ford-Fulkerson has a running time of $O(E \cdot |f^*|)$, where $f^*$ is a max flow. This is because the capacities are integers, we know Ford-Fulkerson increases the value by atleast $1$ at each step, making the runtime be bounded by the max flow ($|f^*|$) and $E$ is used for finding an augmenting path.
+\\
+\\
+We can improve the bound on Ford-Fulkerson by finding the augmenting path with a breadth-first search. This has arunning time of $O(VE^2)$.
+
+\subsubsection*{Can you give an introduction to Maximum bipartite matching and how we can solve it using Max flow?}
+Given an undirected graph $G = (V, E)$, a \textit{\textbf{matching}} is a subset of edges $M \subseteq E$ such that for all vertices $v \in V$, at most one edge of $M$ is incident on $v$. A \textit{\textbf{maximum matching}} is amatching of maximum cardinality. We shall restrict our attention to finding maximum matchings in bipartite graphs: graphs in which the vertex set can be partitioned into $V = L \cup R$, where $L$ and $R$ are disjoint and all edges in $E$ go between $L$ and $R$.
+\\
+\\
+The trick is to construct a flow network in which flows correspond to matchings. We define the \textit{\textbf{corresponding flow network}} $G' = (V', E')$ for the bipartite graph $G$ as follows. We let the source $s$ and sink $t$ be new vertices not in $V$, $V' = V \cup \{s, t\}$, and 
+$$
+E' = \{(s, u) : u \in L\} \cup \{(u, v) : (u, v) \in E\} \cup \{(v, t) : v \in R\}.
+$$ 
+To complete the construction, we assign unit capacity to each edge in $E'$. Since each vertex in $v$ has at least one incident edge, $|E| \geq |V|/2$. Thus, $|E| \leq |E'| = |E| + |V| \leq 3 |E´|$, and so $|E'| = \Theta(E)$.
 
 \clearpage
 
@@ -158,6 +191,14 @@ We also have, that $f(S, T) = |f|$.
 \subsection*{Program}
 \begin{enumerate}
     \item Introduction
+    \item Introduction to
+    \begin{itemize}
+        \item \textit{Objective function}
+        \item \textit{Constraints}
+        \item Various forms of LP
+        \item \textit{SIMPLEX}
+        \item \textit{Duality}
+    \end{itemize}
     \item Preparing and running SIMPLEX on example
     \item Proof of weak duality
 \end{enumerate}
@@ -170,7 +211,7 @@ We also have, that $f(S, T) = |f|$.
 
 \clearpage
 \subsection*{Presentation}
-Hey guys. I will be talking about Max flow. I have here a program of the things I will go through *Hand out program*. As you can see, mine is identical to yours and it does not contain any information that it is not allowed to *Show own program*. First I will be giving a brief introduction to the topic, then I will transform an example into standard form, which will then be transformed into slack form, which I then will run the SIMPLEX-algorithm on. Lastly, I will pove \textit{weak duality}, which says, that the solution to the dual of a linear program is always an upper bound on the solution to the orignial linear program.
+Hey guys. I will be talking about Linear Programming. I have here a program of the things I will go through *Hand out program*. As you can see, mine is identical to yours and it does not contain any information that it is not allowed to *Show own program*. First I will be giving a brief introduction to the topic, then I will transform an example into standard form, which will then be transformed into slack form, which I then will run the SIMPLEX-algorithm on. Lastly, I will pove \textit{weak duality}, which says, that the solution to the dual of a linear program is always an upper bound on the solution to the orignial linear program.
 \\
 \\
 In a linear-programming problem we wish to optimize a linear function subject to a set of linear inequalities. A linear-programming problem consists of an \textit{\textitbf{objective function}}, that we wish to optimize, and some \textit{\textbf{linear constraints}}, which multiple non-strict inequalities that are used to restricting the solution of the objective function.
@@ -190,9 +231,6 @@ where the last constraint is required in standard form.
 \\
 \\
 To use the simplex algorithm, the linear program should be in \textit{\textbf{slack form}}, where the nonnegativity constraints are the only inequality constraints, and the remaining constraints are equalities. 
-\\
-\\
-When preparing a linear program, we often need to transform it into another equivalent linear program. We say that two maximization linear programs $L$ and $L'$ are \textit{\textbf{equivalent}} if for each feasible solution $\bar{x}$ to $L$ with objective value $z$, there is a corresponding feasible solution $\bar{x}'$ to $L'$ with objective value $z$, and for each feasible solution $\bar{x}'$ to $L'$ with objective value $z$, there is a corresponding feasible solution $\bar{x}$ to $L$ with objective value $z$. A minimization linear program $L$ and a maximization linear program $L'$ are equivalent if for each feasible soltuion $\bar{x}$ to $L$ with objective value $z$, there is a corresponding feasible solution $\bar{x}'$ to $L'$ with objective value $-z$, and for each feasible solution $\bar{x}'$ to $L'$ with objective value $z$, there is a corresponding feasible solution $\bar{x}$ to $L$ with objective value $-z$.
 \\
 \\
 Let's transform the example into standard and slack form *Write the example on the blackboard*. First off, we see that the example is a minimization problem instead of a maximization problem. This can easily be fixed by negating the coefficients in the objective function. Thus, by doing so we obtain the new objective function
@@ -237,7 +275,7 @@ x_1 + x'_2 + x''_2 \geq 7
 $$
 has a greater-than-or-equal-to-sign instead of a less-than-or-equal-to-sign. This can easily be fixed by multiplying the constraint through by $-1$. Thus, we instead obtain
 $$
--x_1 - x'_2 - x''_2 \leq 7.
+-x_1 - x'_2 - x''_2 \leq -7.
 $$
 In total we wish to maximize the objective function
 $$
@@ -248,7 +286,7 @@ and the constraints
     \begin{align*}
         x_1 - 2x'_2 + 2x''_2 &\leq 4\\
         x_1 + x'_2 + x''_2 &\leq 7 \\
-        -x_1 -x'_2 - x''_2 &\leq 7\\
+        -x_1 -x'_2 - x''_2 &\leq -7\\
         x_1, x'_2, x''_2 &\geq 0.
     \end{align*}
 \end{center}
@@ -257,7 +295,7 @@ For consistency in variable names, we rename $x'_2$ to $x_2$ and $x''_2$ to $x_3
     \begin{align*}
         x_1 - 2x_2 + 2x_3 &\leq 4\\
         x_1 + x_2 + x_3 &\leq 7 \\
-        -x_1 -x_2 - x_3 &\leq 7\\
+        -x_1 -x_2 - x_3 &\leq -7\\
         x_1, x_2, x_3 &\geq 0.
     \end{align*}
 \end{center}
@@ -265,7 +303,7 @@ and the objective function we wish to maximize
 $$
 2x_1 - 3x_2 + 3x_3.
 $$
-The linear program is now in standard form. Let transform this further into slack form. This is rather easily done by introducing a slack variable for each constraint, which measures the difference in the left and right hand side. By doing so we get the linear programming
+The linear program is now in standard form. Let transform this further into slack form. This is rather easily done by introducing a slack variable for each constraint, which measures the difference in the left and right hand side. This is done by subtracting the left hand side on both sides and introducing a new nonnegativity constraint for each constraint. By doing so we get the linear programming
 $$
 z = 2x_1 - 3x_2 + 3x_3
 $$
