@@ -175,16 +175,6 @@ This depends on how we find the augmenting path. If we assume that the capacitie
 \\
 We can improve the bound on Ford-Fulkerson by finding the augmenting path with a breadth-first search. This has arunning time of $O(VE^2)$.
 
-\subsubsection*{Can you give an introduction to Maximum bipartite matching and how we can solve it using Max flow?}
-Given an undirected graph $G = (V, E)$, a \textit{\textbf{matching}} is a subset of edges $M \subseteq E$ such that for all vertices $v \in V$, at most one edge of $M$ is incident on $v$. A \textit{\textbf{maximum matching}} is amatching of maximum cardinality. We shall restrict our attention to finding maximum matchings in bipartite graphs: graphs in which the vertex set can be partitioned into $V = L \cup R$, where $L$ and $R$ are disjoint and all edges in $E$ go between $L$ and $R$.
-\\
-\\
-The trick is to construct a flow network in which flows correspond to matchings. We define the \textit{\textbf{corresponding flow network}} $G' = (V', E')$ for the bipartite graph $G$ as follows. We let the source $s$ and sink $t$ be new vertices not in $V$, $V' = V \cup \{s, t\}$, and 
-$$
-E' = \{(s, u) : u \in L\} \cup \{(u, v) : (u, v) \in E\} \cup \{(v, t) : v \in R\}.
-$$ 
-To complete the construction, we assign unit capacity to each edge in $E'$. Since each vertex in $v$ has at least one incident edge, $|E| \geq |V|/2$. Thus, $|E| \leq |E'| = |E| + |V| \leq 3 |E´|$, and so $|E'| = \Theta(E)$.
-
 \clearpage
 
 \section*{Linear Programming and Optimization}
@@ -259,23 +249,23 @@ Any feasible solution $\hat{x}$ to the new linear program corresponds to a feasi
 \\
 We also see, that the first constraint has an equal sign instead of an $\geq$. We know that the equality only holds if and only if both $\geq$ holds and $\leq$ holds. Thus, we can replace the equality constraint by the pair of inequality constraints that uses $\leq$ and $\geq$ instead. Thus, we replace the constraint
 $$
-x_1 + x'_2 + x''_2 = 7
+x_1 + x'_2 - x''_2 = 7
 $$
 with the two constraints
 $$
-x_1 + x'_2 + x''_2 \leq 7
+x_1 + x'_2 - x''_2 \leq 7
 $$
 and
 $$
-x_1 + x'_2 + x''_2 \geq 7.
+x_1 + x'_2 - x''_2 \geq 7.
 $$
 Lastly, we see, that the constraint
 $$
-x_1 + x'_2 + x''_2 \geq 7
+x_1 + x'_2 - x''_2 \geq 7
 $$
 has a greater-than-or-equal-to-sign instead of a less-than-or-equal-to-sign. This can easily be fixed by multiplying the constraint through by $-1$. Thus, we instead obtain
 $$
--x_1 - x'_2 - x''_2 \leq -7.
+-x_1 - x'_2 + x''_2 \leq -7.
 $$
 In total we wish to maximize the objective function
 $$
@@ -285,8 +275,8 @@ and the constraints
 \begin{center}
     \begin{align*}
         x_1 - 2x'_2 + 2x''_2 &\leq 4\\
-        x_1 + x'_2 + x''_2 &\leq 7 \\
-        -x_1 -x'_2 - x''_2 &\leq -7\\
+        x_1 + x'_2 - x''_2 &\leq 7 \\
+        -x_1 -x'_2 + x''_2 &\leq -7\\
         x_1, x'_2, x''_2 &\geq 0.
     \end{align*}
 \end{center}
@@ -294,8 +284,8 @@ For consistency in variable names, we rename $x'_2$ to $x_2$ and $x''_2$ to $x_3
 \begin{center}
     \begin{align*}
         x_1 - 2x_2 + 2x_3 &\leq 4\\
-        x_1 + x_2 + x_3 &\leq 7 \\
-        -x_1 -x_2 - x_3 &\leq -7\\
+        x_1 + x_2 - x_3 &\leq 7 \\
+        -x_1 -x_2 + x_3 &\leq -7\\
         x_1, x_2, x_3 &\geq 0.
     \end{align*}
 \end{center}
@@ -310,12 +300,45 @@ $$
 \begin{center}
     \begin{align*}
         x_4 = 4 - x_1 + 2x_2 - 2x_3 \\
-        x_5 = 7 - x_1 - x_2 - x_3 \\
-        x_6 = 7 + x_1 + x_2 + x_3 \\
+        x_5 = 7 - x_1 - x_2 + x_3 \\
+        x_6 = -7 + x_1 + x_2 - x_3 \\
     \end{align*}
 \end{center}
 where we have omitted the nonnegativity constraints. \\
-Thus, the linear program is now in slack form and we can perform the SIMPLEX algorithm. The simplex algorithm works by continuously changing the solution by pivoting variables to and from the basic variables, which are the variables on the left hand side. This is done by picking a variable in the objective function which positively increases the value, and pivoting it with the basic variable that bottlenecks how much the non-basic variable can be increased. Let's run the SIMPLEX algorithm *Run SIMPLEX*.
+Thus, the linear program is now in slack form and we can perform the SIMPLEX algorithm. The simplex algorithm works by continuously changing the solution by pivoting variables to and from the basic variables, which are the variables on the left hand side. This is done by picking a variable in the objective function which positively increases the value, and pivoting it with the basic variable that bottlenecks how much the non-basic variable can be increased. Let's run the SIMPLEX algorithm. We have
+$$
+z = 2x_1 - 3x_2 + 3x_3
+$$
+\begin{center}
+    \begin{align*}
+        x_4 = 4 - x_1 + 2x_2 - 2x_3 \\
+        x_5 = 7 - x_1 - x_2 + x_3 \\
+        x_6 = -7 + x_1 + x_2 - x_3 \\
+    \end{align*}
+\end{center}
+We see that the only variables in the objective functio with a positive coefficient is $x_1$ and $x_3$. Let us choose $x_1$ as our pivot elements. We isolate it in $x_4$, since this is the tighest function. Then, we have
+$$
+z = 8 + x_2 - x_3 - 2x_6
+$$
+\begin{center}
+    \begin{align*}
+        x_1 = 4 + 2x_2 - 2x_3 - x_6 \\
+        x_5 = 3 - 3x_2 + 3x_3 + x_6 \\
+        x_6 = -3 + 3x_2 - 3x_2 - x_6 \\
+    \end{align*}
+\end{center}
+Then, we see, that the only variable in the objective function wtih a positive coefficient is $x_2$, which we choose as the objective function. Now, isolate it in $x_5$, as this is the only function with a negative $x_2$ coefficient. Then, we have
+$$
+z = 9 + \frac{5x_6}{3} - \frac{x_4}{3}
+$$
+\begin{center}
+    \begin{align*}
+        x_1 = 6 + \frac{5x_6}{3} - \frac{x_4}{3} \\
+        x_2 = 1 + x_3 + \frac{x_6}{3} - \frac{2x_4}{3} \\
+        x_6 = -x_5 \\
+    \end{align*}
+\end{center}
+We then stop, as no non-basic variable appear in the objective function with a positive coefficient. Our solution is thus $(6, 1, 0, 0, 0, 0)$ with a value of $9$.
 \\
 \\
 Now that we have run the algorithm, I will be proving \textit{weak duality}. Weak duality is a weak version of something called \textit{duality}, which is used to prove that a solution is optimal. Given a linear program in standard form we define the dual linear program as
