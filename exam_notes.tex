@@ -183,20 +183,21 @@ We can improve the bound on Ford-Fulkerson by finding the augmenting path with a
     \item Introduction
     \item Introduction to
     \begin{itemize}
+        \item Various forms of LP
         \item \textit{Objective function}
         \item \textit{Constraints}
-        \item Various forms of LP
-        \item \textit{SIMPLEX}
-        \item \textit{Duality}
+        \item Algorithm for solving linear programming
     \end{itemize}
     \item Preparing and running SIMPLEX on example
     \item Proof of weak duality
 \end{enumerate}
 \begin{center}
-    \begin{figure}[h!]
-        \centering
-        \includegraphics[width = 4 cm]{entities/LP_example.PNG}
-    \end{figure}
+    \begin{tabular}{ll}
+        minimize & $-x_1 - 2x_2$ \\
+        subject to & $x_1 + x_2 = 6$ \\
+        & $x_1 - 2x_2 \leq 4$ \\
+        & $x_1 \geq 0$
+    \end{tabular}
 \end{center}
 
 \clearpage
@@ -204,143 +205,108 @@ We can improve the bound on Ford-Fulkerson by finding the augmenting path with a
 Hey guys. I will be talking about Linear Programming. I have here a program of the things I will go through *Hand out program*. As you can see, mine is identical to yours and it does not contain any information that it is not allowed to *Show own program*. First I will be giving a brief introduction to the topic, then I will transform an example into standard form, which will then be transformed into slack form, which I then will run the SIMPLEX-algorithm on. Lastly, I will pove \textit{weak duality}, which says, that the solution to the dual of a linear program is always an upper bound on the solution to the orignial linear program.
 \\
 \\
-In a linear-programming problem we wish to optimize a linear function subject to a set of linear inequalities. A linear-programming problem consists of an \textit{\textitbf{objective function}}, that we wish to optimize, and some \textit{\textbf{linear constraints}}, which multiple non-strict inequalities that are used to restricting the solution of the objective function.
+Linear programming is given in two forms; \textit{\textbf{standard form}} and \textitbf{slack form}.
 \\
 \\
-To solve a linear-programming problem, one can make use of the \textit{\textbf{simplex algorithm}}, which takes as input a linear program and returns an optimal solution. 
-\\
-\\
-In \textitbf{standard form} we are given $n$ real numbers $c_1, c_2, ..., c_n$, $m$ real numbers $b_1, b_2, ..., b_m$, and $mn$real numbers $a_{ij}$ for $i = 1, 2, ..., m$ and $j = 1, 2, ..., n$. We then wish to find $n$ real numbers $x_1, x_2, ..., x_n$ that maximize
+\textitbf{standard form} has the following form
 $$
 \sum_{j = 1} ^n c_j x_j
 $$
 subject to
 $$\sum_{j = 1} ^n a_{ij} x_j \leq b_i \quad \text{for } i = 1, 2, ..., m$$
 $$x_j \geq 0 \quad \text{for } j = 1, 2, ..., n$$
-where the last constraint is required in standard form. 
+The first equation is the \textitbf{objective function}, which we wish to optimize with respect to the \textitbf{constraints}, which are the following lines, where the last constraint is required in standard form.
 \\
 \\
-To use the simplex algorithm, the linear program should be in \textit{\textbf{slack form}}, where the nonnegativity constraints are the only inequality constraints, and the remaining constraints are equalities. 
+\textitbf{Slack form} is very similar to standard form, however, only the nonnegativity constraints are the only inequality constraints, and the remaining constraints are equalities. 
+\\
+\\
+To solve a linear program we use the simplex algorithm, whose input is a linear program in \textit{\textbf{slack form}}.
 \\
 \\
 Let's transform the example into standard and slack form *Write the example on the blackboard*. First off, we see that the example is a minimization problem instead of a maximization problem. This can easily be fixed by negating the coefficients in the objective function. Thus, by doing so we obtain the new objective function
 $$
-2x_1 - 3x_2.
+x_1 + x_2.
 $$
 Since the two linear programs have identical sets of feasible solutions and, for any feasible solution, the objective value the first linear program is the negative of the objective value in the second program, the two linear programs are equivalent.
 \\
 \\
-Next, we see that $x_2$ does not have a nonnegativity constraint. We can fix this by replacing each occurence of $x_2$ by $x'_2 - x''_2$ and add the nonnegativity constraint $x'_2, x''_2 \geq 0$. Thus, by doing so we receive the objective function
-$2x_1 - 3x'_2 + 3x''_2,$
+Next, we see that $x_2$ does not have a nonnegativity constraint. We can fix this by replacing each occurence of $x_2$ by $x'_2 - x''_2$ and add the nonnegativity constraint $x'_2, x''_2 \geq 0$. To ease the readibility, I will instead let $x'_2 = x_2$ and $x''_2 = x_3$. Thus, by doing so we receive the objective function
+$x_1 + 2x_2 - 2x_3$
 the two constraints
 $$
-x_1 + x'_2 + x''_2 = 7
+x_1 + x_2 - x_3 = 6
 $$
 and
 $$
-x_1 - 2x'_2 + 2x''_2 \leq 4,
+x_1 - 2x_2 + 2x_3 \leq 4
 $$
 and the nonnegativity constraint
 $$
-x_1, x'_2, x''_2 \geq 0.
+x_1, x_2, x_3 \geq 0.
 $$
 Any feasible solution $\hat{x}$ to the new linear program corresponds to a feasible solution $\bar{x}$ to the original linear program with $\hat{x}_j = \hat{x}'_j - \hat{x}''_j$ and with the same objective value. Also, any feasible solution $\hat{x}$ to the original linear program corresponds to a feasible solution $\hat{x}$ to the new linear program with $\hat{x}_j' = \bar{x}_j$ and $\hat{x}''_j = 0$ if $\hat{x}_j \geq 0$, or with $\hat{x}''_j = -\bar{x}_j$ and $\hat{x}'_j = 0$ if $\bar{x}_j < 0$. Thus, the two linear programs are equivalent.
 \\
 \\
 We also see, that the first constraint has an equal sign instead of an $\geq$. We know that the equality only holds if and only if both $\geq$ holds and $\leq$ holds. Thus, we can replace the equality constraint by the pair of inequality constraints that uses $\leq$ and $\geq$ instead. Thus, we replace the constraint
 $$
-x_1 + x'_2 - x''_2 = 7
+x_1 + x_2 - x_3 = 6
 $$
 with the two constraints
 $$
-x_1 + x'_2 - x''_2 \leq 7
+x_1 + x_2 - x_3 \leq 6
 $$
 and
 $$
-x_1 + x'_2 - x''_2 \geq 7.
+x_1 + x_2 - x_3 \geq 6
 $$
 Lastly, we see, that the constraint
 $$
-x_1 + x'_2 - x''_2 \geq 7
+x_1 + x_2 - x_3 \geq 6
 $$
 has a greater-than-or-equal-to-sign instead of a less-than-or-equal-to-sign. This can easily be fixed by multiplying the constraint through by $-1$. Thus, we instead obtain
 $$
--x_1 - x'_2 + x''_2 \leq -7.
+-x_1 - x_2 + x_3 \geq -6
 $$
-In total we wish to maximize the objective function
-$$
-2x_1 - 3x'_2 + 3x''_2
-$$
-and the constraints
+In total we have
 \begin{center}
-    \begin{align*}
-        x_1 - 2x'_2 + 2x''_2 &\leq 4\\
-        x_1 + x'_2 - x''_2 &\leq 7 \\
-        -x_1 -x'_2 + x''_2 &\leq -7\\
-        x_1, x'_2, x''_2 &\geq 0.
-    \end{align*}
+    \begin{tabular}{ll}
+        maximize & $x_1 + 2x_2 - 2x_3$ \\
+        subject to & $x_1 + x_2 - x_3 \leq 6$ \\
+        & $-x_1 - x_2 + x_3 \geq -6$\\
+        & $x_1 - 2x_2 + x_3 \leq 4$ \\
+        & $x_1, x_2, x_3 \geq 0$
+    \end{tabular}
 \end{center}
-For consistency in variable names, we rename $x'_2$ to $x_2$ and $x''_2$ to $x_3$ and obtain 
-\begin{center}
-    \begin{align*}
-        x_1 - 2x_2 + 2x_3 &\leq 4\\
-        x_1 + x_2 - x_3 &\leq 7 \\
-        -x_1 -x_2 + x_3 &\leq -7\\
-        x_1, x_2, x_3 &\geq 0.
-    \end{align*}
-\end{center}
-and the objective function we wish to maximize
-$$
-2x_1 - 3x_2 + 3x_3.
-$$
 The linear program is now in standard form. Let transform this further into slack form. This is rather easily done by introducing a slack variable for each constraint, which measures the difference in the left and right hand side. This is done by subtracting the left hand side on both sides and introducing a new nonnegativity constraint for each constraint. By doing so we get the linear programming
-$$
-z = 2x_1 - 3x_2 + 3x_3
-$$
 \begin{center}
-    \begin{align*}
-        x_4 = 4 - x_1 + 2x_2 - 2x_3 \\
-        x_5 = 7 - x_1 - x_2 + x_3 \\
-        x_6 = -7 + x_1 + x_2 - x_3 \\
-    \end{align*}
+    \begin{tabular}{l}
+        $z = x_1 + 2x_2 - 2x_3$ \\
+        $x_4 = 6 - x_1 - x_2 + x_3$ \\
+        $x_5 = -6 + x_1 + x_2 - x_3$\\
+        $x_6 = 4 - x_1 + 2x_2 - x_3$
+    \end{tabular}
 \end{center}
 where we have omitted the nonnegativity constraints. \\
 Thus, the linear program is now in slack form and we can perform the SIMPLEX algorithm. The simplex algorithm works by continuously changing the solution by pivoting variables to and from the basic variables, which are the variables on the left hand side. This is done by picking a variable in the objective function which positively increases the value, and pivoting it with the basic variable that bottlenecks how much the non-basic variable can be increased. Let's run the SIMPLEX algorithm. We have
-$$
-z = 2x_1 - 3x_2 + 3x_3
-$$
 \begin{center}
-    \begin{align*}
-        x_4 = 4 - x_1 + 2x_2 - 2x_3 \\
-        x_5 = 7 - x_1 - x_2 + x_3 \\
-        x_6 = -7 + x_1 + x_2 - x_3 \\
-    \end{align*}
+    \begin{tabular}{l}
+        $z = x_1 + 2x_2 - 2x_3$ \\
+        $x_4 = 6 - x_1 - x_2 + x_3$ \\
+        $x_5 = -6 + x_1 + x_2 - x_3$\\
+        $x_6 = 4 - x_1 + 2x_2 - x_3$
+    \end{tabular}
 \end{center}
-We see that the only variables in the objective functio with a positive coefficient is $x_1$ and $x_3$. Let us choose $x_1$ as our pivot elements. We isolate it in $x_4$, since this is the tighest function. Then, we have
-$$
-z = 8 + x_2 - x_3 - 2x_6
-$$
+We see, that $x_2$ is the only variable that can increase the value of the objective function, so we choose $x_2$ as the pivot element. Next, we isolate $x_2$ in $x_4$, since $x_4$ is the only constraint with a negative coefficient for $x_2$. The value of $x_2$ is then inserted in the other constraints as well as the objective function, resulting in
 \begin{center}
-    \begin{align*}
-        x_1 = 4 + 2x_2 - 2x_3 - x_6 \\
-        x_5 = 3 - 3x_2 + 3x_3 + x_6 \\
-        x_6 = -3 + 3x_2 - 3x_2 - x_6 \\
-    \end{align*}
+    \begin{tabular}{l}
+        $z = 12 - x_1 - 2x_4$ \\
+        $x_2 = 6 - x_1 + x_3 - x_4$ \\
+        $x_5 = -x_4$\\
+        $x_6 = 16 - 3x_1.$
+    \end{tabular}
 \end{center}
-Then, we see, that the only variable in the objective function wtih a positive coefficient is $x_2$, which we choose as the objective function. Now, isolate it in $x_5$, as this is the only function with a negative $x_2$ coefficient. Then, we have
-$$
-z = 9 + \frac{5x_6}{3} - \frac{x_4}{3}
-$$
-\begin{center}
-    \begin{align*}
-        x_1 = 6 + \frac{5x_6}{3} - \frac{x_4}{3} \\
-        x_2 = 1 + x_3 + \frac{x_6}{3} - \frac{2x_4}{3} \\
-        x_6 = -x_5 \\
-    \end{align*}
-\end{center}
-We then stop, as no non-basic variable appear in the objective function with a positive coefficient. Our solution is thus $(6, 1, 0, 0, 0, 0)$ with a value of $9$.
-\\
-\\
+We now stop, as no basic variable appear in the objective function with a positive coefficient. Our solution is this $(0, 6, 0, 0, 0, 16)$, or $(x_1, x_2) = (0, 6)$ for the original problem, with a value of $12$.
 Now that we have run the algorithm, I will be proving \textit{weak duality}. Weak duality is a weak version of something called \textit{duality}, which is used to prove that a solution is optimal. Given a linear program in standard form we define the dual linear program as
 \begin{center}
     \begin{align*}
@@ -366,22 +332,175 @@ because
 \end{center}
 
 \section*{Extras}
+We say that two maximization linear programs $L$ and $L'$ are \textit{\textbf{equivalent}} if for each feasible solution $\bar{x}$ to $L$ with objective value $z$, there is a corresponding feasible solution $\bar{x}'$ to $L'$ with objective value $z$, and for each feasible solution $\bar{x}'$ to $L'$ with objective value $z$, there is a corresponding feasible solution $\bar{x}$ to $L$ with objective value $z$. A minimization linear program $L$ and a maximization linear program $L'$ are equivalent if for each feasible soltuion $\bar{x}$ to $L$ with objective value $z$, there is a corresponding feasible solution $\bar{x}'$ to $L'$ with objective value $-z$, and for each feasible solution $\bar{x}'$ to $L'$ with objective value $z$, there is a corresponding feasible solution $\bar{x}$ to $L$ with objective value $-z$.
+\\
+\\
+\subsubsection*{Corollary 29.9}
+Let $\bar{x}$be a feasible solution to aprimal linear program, and let $\bar{y}$ be a feasible solution to the corresponding dual linear program. If
+$$
+\sum_{j = 1} ^n c_j \bar{x}_j = \sum_{i = 1} ^m b_i \bar{y}_i,
+$$
+then $\bar{x}$ and $\bar{y}$ are optimal solutions to the primal and dual linear programs, respectively. \\
+\textit{\textbf{Proof}} By the lemma of weak duality, the objective value of a feasible solution to the primal cannot exceed that of a feasible solution to the dual. The primal linear program is a maximization problem and the dual is a minimization problem. Thus, if feasible solutions $\bar{x}$ and $\bar{y}$ have the same objective value, neither can be improved.
 
 \section*{Questions they can ask}
+\subsection*{ER DER NOGET HER?}
 \clearpage
 
 \section*{Randomized Algorithms}
 \subsection*{Disposition}
 \begin{enumerate}
     \item Introduction
-    \item Example on running randomized quicksort + motivation behind randomness
-    \item Analysis of expected runtime of randomized quicksort
-    \item Example on running the min-cut algorithm
+    \item Quicksort:
+    \begin{enumerate}
+        \item Idea behind Quicksort
+        \item Example on running non-random Quicksort
+        \item Motivation behind randomness in Quicksort
+        \item Analysis of expected runtime of randomized quicksort
+    \end{enumerate}
+    \item Min-cut:
+    \begin{enumerate}
+        \item Introduction to min-cut
+        \item Example on running the min-cut algorithm
+    \end{enumerate}
     \item Las Vegas Algorithms vs Monte Carlo Algorithms
 \end{enumerate}
+$$
+[70, 12, 34, 47, 9, 72, 60, 7]
+$$
+\begin{figure*}[h!]
+    \centering
+    \includegraphics[width = 4 cm]{entities/min-cut_example.PNG}
+\end{figure*}
 
 \clearpage
 \subsection*{Presentation}
+Hey guys. I will be talking about Randomized Algorithms. I have here a program of the things I will go through *Hand out program*. As you can see, mine is identical to yours and it does not contain any information that it is not allowd to *Show own program*. First, I will be giving a brief introduction to the topic. Then I will be talking about quicksort. Lastly, I will be giving a brief introduction to Las Vegas algorithms and Monte Carlo algorithms.
+\\
+\\
+Quicksort works by recursively picking a pivot element and then group all elements smaller than the pivot element in one set and all of the elements greater than the pivot element in another set, making the pivot element be in its sorted index. Then the algorithm is performed on the two sets recursively.
+\\
+\\
+Consider running the algorithm on the provided example. If we were to always pick the "median element" as the pivot element, this would result in the following tree
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width = 8 cm]{entities/quicksort_1.PNG}
+\end{figure}
+which looks like a balanced search tree, so we might expect the number of comparisons to be something like $n \log n$. However, if we instead were to pick an extreme element as the pivot, this would result in the following tree instead
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width = 8 cm]{entities/quicksort_2.PNG}
+\end{figure}
+which looks like an extremely unbalanced binary search tree, so we might expect the number of comparisons to be someting like $n^2$. Picking the pivot element thus have a great effect on the running time of the algorithm. For this reason, we can instead choose the pivot element uniformly at random. By doing so we can expect the number of comparisons to be $O(n \log n)$, which I will prove now.
+\\
+\\
+We start off by letting $S_{(i)}$ denote the $i$th smallest element in the sorted array $S$, for $1 \leq i \leq n$. Then, we define
+\begin{center}
+    \begin{math}
+        X_{ij} =
+        \begin{cases}
+            1 & \text{if } S_{(i)} \text{ and } S_{(j)} \text{ are compared in an execution} \\
+            0 & \text{otherwise.}
+        \end{cases}
+    \end{math}
+\end{center}
+Thus, the total number of comparisons is
+$$
+\sum_{i < j} X_{ij} = \sum_{i = 1} ^{n - 1} \sum_{j = i + 1} ^n X_{ij}.
+$$
+Then, we are interested in the expected number of comparisons
+$$
+\mathbb{E}\left[ \sum_{i < j} X_{ij} \right] = \sum_{i<j} \mathbb{E} \left[ X_{ij} \right]. 
+$$
+Let $p_{ij}$ denote the probability that $S_{(i)}$ and $S_{(j)}$ are compared in an execution. Since $X_{ij}$ only assumes the values $0$ and $1$ we have
+$$
+\mathbb{E}[X_{ij}] = p_{ij} \cdot 1 + (1 - p_{ij}) \cdot 0 = p_{ij}.
+$$
+Each recursive call returns some sublist $[S_{(a)}, ..., S_{(b)}]$. Let $x = S_{(c)}$ be the pivot. Suppose $a \leq i < j \leq b$. If $c < i$ or $c > j$, then $S_{(i)}$ and $S_{(j)}$ are not compared now, but are in the same subtree and might be compared later. If $i < c < j$, then $S_{(i)}$ and $S_{(j)}$ are never compared. If $c = i$ or $c = j$ then $S_{(i)}$ and $S_{(j)}$ are compared once, right now. Thus, $S_{(i)}$ and $S_{(j)}$ are compared iff $S_{(i)}$ or $S_{(j)}$ is first of $S_{(s)}, ..., S_{(j)}$ to be chosen as pivot. Hence why $p_{ij}$ is the conditional probability of picking $S_{(i)}$ or $S_{(j)}$ given that the pivot is picked uniformly at random in ${S_{(i)},S_{(i + 1)}, ..., S_{(j)}}$
+$$
+p_{ij} = \mathbb{P}\left[ c \in \{i, j\} | c \in \{i, i + 1, ..., j\} \right] = \frac{2}{|\{i, i+1, ..., j\}|} = \frac{2}{j - i + 1}.
+$$
+We thus have
+\begin{center}
+    \begin{align*}
+        \mathbb{E}\left[ \sum_{i < j} X_{ij} \right] &= \sum_{i<j} \mathbb{E} \left[ X_{ij} \right] && \text{(Linearity of expectation)} \\
+        &= \sum_{i<j} p_{ij} \\
+        &= \sum_{i<j} \frac{2}{j - i + 1} \\
+        &= \sum_{i = 1} ^{n - 1} \sum_{j = i + 1}^n \frac{2}{j - i + 1} && \text{(Using} \sum_{i<j} = \sum_{i = 1} ^{n - 1} \sum_{j = i + 1} \text{)} \\
+        &= \sum_{i = 1} ^{n - 1} \sum_{k = 2} ^{n - i + 1} \frac{2}{k} \\
+        &< \sum_{i = 1} ^n \sum_{k = 2} ^n \frac{2}{k} && \text{(Adding more positive terms increases total value)} \\
+        &= 2n \sum_{k = 2} ^n \frac{1}{k} \\
+        &= 2n \left(\left( \sum_{k = 1} ^n \frac{1}{k} \right) -1 \right) \\
+        &= 2n(H_n - 1) && \left( \text{Using } H_n = \sum_{k = 1}^{n} \frac{1}{k} \right) \\
+        &\leq 2n \int_1 ^n \frac{1}{x} dx = 2n \ln n = O(n \log n) && \text{(Using } H_n - 1 \leq \int_{1} ^n \frac{1}{x} dx = \ln n 
+    \end{align*}
+\end{center}
+Now, onto min-cut. In min-cut we $G$ be a connected, undirected graph with $n$ vertices. A \textit{cut} in $G$ is a set of edges whose removalresults in $G$ being broken into two or more components. The goal is to find a cut with minimal cardinality.
+\\
+\\
+The algorithm works by repeatedly picking an edge uniformly at random and merging the two vertices at its end-points. Edges between vertices that are merged are removed, so that there are never any self-loops.
+\\
+\\
+By running this algorithm on the example we potentially get the following
+\begin{figure*}[h]
+    \centering
+    \includegraphics{entities/min_cut_example_performance.PNG}
+\end{figure*}
+Thus, the edges $4$ and $4'$ is a min-cut.
+\\
+\\
+Lastly, let us talk about Las Vegas and Monte Carlo algorithms. A Las Vegas algorithm is a randomized algorithm that always return the correct output, and the randomness lies in its running time. A Monte Carlo algorithm on the other hand is a randomized algorithm that does not necessarily return a correct output, however, we can run it multiple times to get a correct output.
+
+\subsection*{Extras}
+\subsubsection*{Lower-bound of finding min-cut}
+The min-cut algorithm has a probability of $\frac{2}{n(n - 1)}$ of finding a specific min-cut. \\
+For any vertex $v$ in a multigraph $G$, the \textit{neighborhood} of $v$, denoted $\Gamma (v)$, is the set of vertices of $G$ that are adjacent to $v$. The \textit{degree} of $v$, denoted $d(v)$, is the number of edges incident on $v$. For a set $S$ of vertices of $G$, the neighborhood of $S$, denoted $\Gamma(S)$, is the union of the neighborhoods of the constituent vertices.
+\\
+\\
+Let $k$ be the min-cut size and $G_i = (V_i, E_i)$ be the graph $G$ after $i$ iterations, which has $n_i = n - i$ vertices. We fix our attention on a particular min-cut $C$ with $k$ edges. Then, $G_i$ has at least $n_i |C|/2$ edges because
+$$
+\frac{1}{2} \sum_{v \in V_i} d_i(v) \geq \frac{1}{2} n_i |C| \quad \text{(Using } d_i(v) \geq |C| \text{)}.
+$$
+We will bound from below the probability that no edge of $C$ is ever contracted during an execution of the algorithm.
+\\
+\\
+Let $\epsilon_i$ denote the event of not picking an edge of $C$ at the $i$th step, for $1 \leq i \leq n - 2$. Let $p_i = \mathbb{P}\left[ \epsilon_i | \cap_{j=i} ^{i - 1} \epsilon_j \right]$. The probability of picking an edge of $C$ in the $i$th iteration, given that no edge of $C$ has been picked in a previous iteration, is thus
+\begin{center}
+    \begin{align*}
+        1 - p_i &= \mathbb{P}\left[ \epsilon_i | \cap_{j=i} ^{i - 1} \epsilon_j \right] \\
+        &= \mathbb{P} \left[ e \in E_{i - 1} is in C | \cap_{j = 1} ^{i - 1} \epsilon_j \right] \\
+        &= \frac{|C|}{|E_{i - 1}|} \leq \frac{|C|}{\frac{1}{2} n_{i - 1} |C|}
+        &= \frac{2}{n_{i - 1}}
+        &= \frac{2}{n - (i - 1)} p_i \geq 1 - \frac{2}{n-i + 1} = \frac{n-i-1}{n-i+1}.
+        &\Rightarrow
+    \end{align*}
+\end{center} 
+Thus, the probability of finding $C$ can then by found by
+\begin{center}
+    \begin{align*}
+        \mathbb{P} \left[C \text{is found} \right] &= \prod_{i = 1} ^{n-2} p_i \\
+        &\geq \prod_{i = 1} ^{n - 2} \frac{n-1-i}{n+1-i} \\
+        &= \frac{n-2}{n} \frac{n-3}{n-1} \frac{n-4}{n-2} \cdots \frac{3}{5} \frac{2}{4} \frac{1}{3} \\
+        &= \frac{2}{n(n - 1)}.
+    \end{align*}
+\end{center}
+Suppose we were to repeat the min-cut algorithm $n^2/2$ times, making independent random choices each time. The probability that a min-cut is not found in any of the $n^2/2$ attempts is at most
+$$
+\left( 1 - \frac{2}{n^2} \right)^{n^2/2} < \frac{1}{e}.
+$$
+
+\subsection*{Questions they can ask}
+\subsubsection*{What is the probability of the min-cut algorithm succeeding?}
+The probability of finding a specific min-cut is greater than or equal to
+$$
+\frac{2}{n(n - 1)}.
+$$
+\subsubsection*{If we were to repeat the algorithm $x$ amount of times, which probability would we get for a specific $x$?}
+Suppose we were to repeat the min-cut algorithm $n^2/2$ times, making independent random choices each time. The probability that a min-cut is not found in any of the $n^2/2$ attempts is at most
+$$
+\left( 1 - \frac{2}{n^2} \right)^{n^2/2} < \frac{1}{e}.
+$$
+
 \clearpage
 
 \section*{Hashing}
