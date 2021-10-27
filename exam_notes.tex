@@ -472,7 +472,7 @@ Let $\epsilon_i$ denote the event of not picking an edge of $C$ at the $i$th ste
 \begin{center}
     \begin{align*}
         1 - p_i &= \mathbb{P}\left[ \epsilon_i | \cap_{j=i} ^{i - 1} \epsilon_j \right] \\
-        &= \mathbb{P} \left[ e \in E_{i - 1} is in C | \cap_{j = 1} ^{i - 1} \epsilon_j \right] \\
+        &= \mathbb{P} \left[ e \in E_{i - 1} \text{ is in } C | \cap_{j = 1} ^{i - 1} \epsilon_j \right] \\
         &= \frac{|C|}{|E_{i - 1}|} \leq \frac{|C|}{\frac{1}{2} n_{i - 1} |C|}
         &= \frac{2}{n_{i - 1}}
         &= \frac{2}{n - (i - 1)} p_i \geq 1 - \frac{2}{n-i + 1} = \frac{n-i-1}{n-i+1}.
@@ -511,7 +511,15 @@ $$
 \subsection*{Disposition}
 \begin{enumerate}
     \item Introduction
-    \item Hashing with chaining:
+    \item Introduction to various terms:
+    \begin{enumerate}
+        \item Random hash functions
+        \item \textit{(Strongly) universal hashing}
+        \item \textit{C-approximately (strongly) universal hashing}
+        \item \textit{Multiply-mod-prime}
+        \item \textit{Multiply-shift}
+    \end{enumerate}
+    \item Hash tables with chaining:
     \begin{enumerate}
         \item Introduction
         \item Proof of expected number of elements in $L[h(x)]$
@@ -525,18 +533,145 @@ $$
 
 \clearpage
 \subsection*{Presentation}
+Hey guys. I will be talking about Hashing. I have here a program of the things I will go through *Hand out program*. As you can see, mine is identical to yours and it does not contain any information that it is not allowd to *Show own program*. First, I will be giving a brief introduction to the topic. Then I will be talking about hash tables with chaining. Lastly, I will be talking about signatures using hashing.
+\\
+\\
+In hashing we have a universe $U$ of keys, that we wish to map randomly to a range $[m] = \{0, ..., m - 1\}$ of hash values. A random hash function $h : U \to [m]$ is thus a randomly chosen function that maps from to $U \to [m]$.
+\\
+\\
+We then have, that a random hash function $h : U \to [m]$ is \textit{universal} if, for all $x \neq y \in U$, we have $\mathbb{P}[h(x) = h(y)] \leq \frac{1}{m}$. It is \textit{strongly universal} if for all $x \neq y$ and $q, r \in [m]$ we have $\mathbb{P}[h(x) = q \wedge h(y) = r] = \frac{1}{m^2}$.
+\\
+\\
+Similarly, a random hash function $h : U \to [m]$ is \textit{c-approximately universal} if for all $x \neq y \in U$, we have $\mathbb{P}[h(x) = h(y)] \leq \frac{c}{m}$. It is \textit{c-approximately strongly universal}, if for all $x \neq y \in U$ and $q, r \in [m]$, we have $\mathbb{P}[h(x) = q \wedge h(y) = r] \leq \frac{c^2}{m^2}$.
+\\
+\\
+Two common random hash function are \textit{Multiply-mod-prime} and \textit{Multiply-shift}. In Multiply-mod-prime, we let \textcolor{red}{$U = [u]$} and \textcolor{red}{$m < u$}, pick a prime \textcolor{red}{$p \geq u$} and choose \textcolor{red}{$a, b \in [p]$} independently and uniformly at random. Then we have the 2-approximately strongly universal hash function 
+$$
+h_{a, b} ^m (x) = ((ax + b) \text{ mod } p) \text{ mod } m.
+$$
+For Multiply-shift we let \textcolor{red}{$U = [2^w]$}, \textcolor{red}{$m = 2^l$} and choose \textcolor{red}{$a \in [2^w]$} uniformly at random. Then we have the 2-approximately universal hash function
+$$
+h_a(x) = \left \lfloor \frac{(ax) \text{ mod } 2^w}{2^{2-l}} \right \rfloor.
+$$
+\\
+\\
+In hash tables with chaining, we have a set $S \subseteq U$ of keys that we wish to store so that we can expect to find any key from $S$ in constant time. 
+\\
+\\
+We start off by letting $n = |S|$ and $m \geq n$. We then pick a universal hash function $h: U \to [m]$, and create an array $L$ of $m$ lists, so that for $i \in [m]$, $L[i]$ is the list of keyts that hash to $i$. To find out if a key $x \in U$ is in $S$, we only have to check if $x$ is in the list $L[h(x)]$, which can be done in time proportional to $1 + |L[h(x)]|$, where the $1$ stands for the constant time it takes to look up the list even if it turns out to be empty. We expect that the length of $L[h(x)]$ is less than \textcolor{red}{or equal to} $1$, which I will prove now.
+\\
+\\
+To prove this, \textcolor{red}{we assume that $x \notin S$, since we want the case where we look through all of $L[h(x)]$ and not just stop once we find the element in $L$}. Then we wish to prove that
+$$
+\mathbb{E}[|L[h(x)]|] \leq 1.
+$$
+We then have
+\begin{center}
+    \begin{align*}
+        \mathbb{E}[|L[h(x)]|] & = \textcolor{red}{\mathbb{E}\left[\left| \{y \in S | h(y) = h(x)\} \right|\right]} && \text{by definition we have } L[i] = \{y \in S | h(y) = i\} \\
+        &= \mathbb{E} \left[ \sum_{y \in S} \left[ h(y) = h(x) \right] \right] \\
+        &= \sum_{y \in S} \mathbb{E} \left[ \left[ h(y) = h(x) \right] \right] && \text{Using linearity of expectation} \\
+        &= \sum_{y \in S} \mathbb{P} [h(x) = h(x)] && [h(x) = h(x)] \text{ can be distributed as a bernoulli variable} \\
+        &\leq |S| \frac{1}{m} && h \text{ is a universal hash function, so we have } \mathbb{P}[h(x) = h(y)] \leq \frac{1}{m}. \\
+        &= \frac{n}{m} && \text{we use } |S| = n \\
+        &\leq 1 && \text{we use } m > n
+    \end{align*}
+\end{center}
+So we have, that we can expect to find out if a key is in $S$ in constant time. Not onto signatures.
+\\
+\\
+In the problem with signature, we wish to assign a unique signature, $s(x)$, to each $x \in S \subseteq U$. Thus, we want $s(x) \neq s(y)$ for all distinct keys $x, y \in S$. To do this, we pick a universal hash function $s : U \to [n^3]$. The probability of an error is thus
+\begin{center}
+    \begin{align*}
+        \textcolor{red}{\mathbb{P}[\exists\{x, y\} \subseteq S : s(x) = s(y)]} & \leq \sum_{\{x, y\} \subseteq S} \mathbb{P}[s(x) = s(y)] \\
+        & \textcolor{red}{\leq} \frac{\binom{n}{2}}{n^3} < \frac{1}{2n}.
+    \end{align*}
+\end{center}
+Where, we in the first inequality use union bound: the probability that at least one of multiple events happen is at most the sum of their probabilities. Thus, the probability of an error is upperbounded by $\frac{1}{2n}$.
+
 \clearpage
 
 \section*{Van Emde Boas Trees}
 \subsection*{Disposition}
 \begin{itemize}
     \item Introduction
-    \item Example on to run \texttt{Member}, \texttt{Insert} and \texttt{Successor}
+    \item Introduction to the structure of van Emde Boas Trees
+    \item Example on running \texttt{Member}(4), \texttt{Insert}(6) and \texttt{Predecessor}(4) on the example.
     \item Proof of Running-time
 \end{itemize}
+\begin{figure*}[h]
+    \centering
+    \includegraphics[height = 4 cm]{entities/vEB_example.png}
+\end{figure*}
+$$
+\{1, 4, 5, 7\} = \{0001_2, 0100_2, 0101_2, 0111_2\}
+$$
 
 \clearpage
 \subsection*{Presentation}
+Hey guys. I will be talking about van Emde Boas Trees . I have here a program of the things I will go through *Hand out program*. As you can see, mine is identical to yours and it does not contain any information that it is not allowd to *Show own program*. First, I will be giving a brief introduction to the topic. Then I will be talking about the structure of the tree. This is followed by me running various procedures on the data structure. Lastly, I will be giving a proof of the running time of the various procedures.
+\\
+\\
+Van Emde Boas Trees store integers in the range $[0, u - 1]$, where $u$ is an exact power of $2$, without any duplicates.
+\\
+\\
+The van Emde Boas Tree is a recursive data structure. Each node with $u > 2$, has the following structure
+\begin{enumerate}
+    \item A field $u$ denoting the universe size $u$
+    \item A field $min$ that stores the minimum element in the vEB tree
+    \item A field $max$ that stores the maximum element in the vEB tree
+    \item A field $Summary$ that points to a summary node, that shows shows whether other clusters contains any elements.
+    \item An array $cluster$ of pointers that points to sub-vEB trees, each of size $\sqrt[\downarrow]{u}$.
+\end{enumerate}
+If $u = 2$, then it only has $u$, $min$ and $max$ as its fields.
+\begin{figure*}[h]
+    \centering
+    \includegraphics[width = 6 cm]{entities/veb_node.PNG}
+\end{figure*}
+\\
+\\
+For vEB trees we have the following equations which are important for the sturcutre
+$$\sqrt[\uparrow]{u} = 2^{\left \lceil (\lg u)/2 \right \rceil}$$
+and
+$$\sqrt[\downarrow]{u} = 2^{\left \lfloor (\lg n)/2 \right \rfloor}.$$
+Then we define the following functions
+\begin{enumerate}
+    \item $high(x) = \left \lfloor \frac{x}{\sqrt[\downarrow]{u}} \right \rfloor$: The high half of $x$'s bits
+    \item $low(x) = x \text{ mod } \sqrt[\downarrow]{u}$: The low half of $x$'s bits
+    \item $index(x, y) = x \sqrt[\downarrow]{u} + y$: The value of element at cluster $x$ index $y$.
+\end{enumerate}
+We then have, that each element $x$ is stored in its corresponding cluster $high(x)$, except for elements that appear in $min$ and $max$ - this varies from implementation to implementation though, as some only excludes $min$ or $max$, however, I have chosen to exclude both, as this was done in our lecture.
+\\
+\\
+Now that we have introduced the structure of the tree, lets run some procedures on the example *Draw example on blackboard*. Let's start by calling \texttt{Member}(5), which simply finds out whether $5$ is in the tree. First off, we have, that $5 = 0101_2$, hence why $high(5) = 01_2$ and $low(5) = 01_2$. Due to $high(5) = 01_2 = 1$, we look in cluster $1$ for element $low(5) = 01_5$. We see that this does not appear in the $min$ nor $max$, so we find $high(01_5) = 0$ and $low(01_5) = 1$. We then look in cluster $0$ for element $1$, which appears, so $5$ is in the tree and the algorithm returns \texttt{TRUE}.
+\\
+\\
+Now, lets insert $6 = 0110_2$ into the tree. When doing insert we assume that the element to insert is not already in the tree. First we see, that the tree is not empty, because $min$ and $max$ are not equal to $NIL$. Then, we see, that $min < 0110_2 < max$, so we shall not swap $0110_2$ with $min$ nor $max$. Then we have $high(6) = 01_2$ and $low(6) = 10_2$. We then pass $10_2$ to cluster $01_2 = 1$. We again have that $min < 10_2 < max$, so we should not swap $10_2$ with $min$ nor $max$. Then, we have $high(10_2) = 1$ and $low(10_2) = 0$. Since cluster $1$ is empty we simply insert element $0$ and update the summary such that it contains $1$ aswell, since cluster $1$ now contains an element, resulting in the tree
+\begin{figure*}[h]
+    \centering
+    \includegraphics[height = 4 cm]{entities/vEB_example_2.png}
+\end{figure*}
+Now, lets find the predecessor of $4 = 0100_2$, which is the greatest element smaller than $4$, which is stored in the tree. We have $high(x) = 01_2 = 1$ and $low(x) = 00_2 = 0$. We then check if cluster $1$ is not empty and whether the minimum of cluster $1$ is less than $4$ (which would imply that the predecessor is in the cluster), which is false. We then check if the the summary is empty or if $1$ is less-than-or-equal to the minimum of the summary, which is true, since we have $01_2 \leq 01_2$. We then return the minimum of the summary, $01_2 = 1$.
+\\
+\\
+Now that we have performed the procedures on the example, lets find out what the worst case runtime of the procedures is. The recursive procedures that implement the operations all have running time characterized by the recurrence
+$$
+T(u) \leq T(\sqrt[\uparrow]{u}) + O(1)
+$$
+where the $O(1)$ comes from calls to $high(x)$ and $low(x)$. If we let $m = \lg u$, we can rewrite this to
+$$
+T(2^m) \leq T(2^{\left \lfloor \frac{m}{2} \right \rfloor}) + O(1).
+$$
+Noting that $\lfloor m/2 \rfloor \leq 2m/3$ for all $m \geq 2$, we have
+$$
+T(2^m) \leq T(2^{2m/3}) + O(1).
+$$
+Letting $S(m) = T(2^m)$, we can rewrite this to
+$$
+S(m) \leq S(2m/3) + O(1)
+$$
+which, by case 2 of the master method, has the solution $S(m) = O(\log m) = O(\log \log u)$. Since each procedure makes at most $1$ recursive call, each procedure has a worst case running time of $O(\log \log u)$.
+
 \clearpage
 
 \section*{NP-Completeness}
