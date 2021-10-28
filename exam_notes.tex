@@ -7,6 +7,7 @@
 \usepackage[noend]{algpseudocode}
 \usepackage[margin=1in]{geometry}
 \usepackage{xcolor}
+\usepackage{blkarray}
 
 \usepackage{graphicx}
 
@@ -674,44 +675,232 @@ which, by case 2 of the master method, has the solution $S(m) = O(\log m) = O(\l
 
 \clearpage
 
+\subsection*{Questions they can ask}
+\subsection*{Extras}
+
+\clearpage
+
 \section*{NP-Completeness}
 \subsection*{Disposition}
 \begin{enumerate}
     \item Introduction
-    \item Introduction to encoding 
-    \item Introduction to formal language
-    \item Definition of \texttt{P}, \texttt{NP} and \texttt{NPC} (and \texttt{NP-hard}),
-    \item Introduction to reducibility
-    \item  Introduction to the ham-cycle problem
+    \item Introduction to various terms:
+    \begin{enumerate}
+        \item \textit{Abstract problems}
+        \item \textit{Encoding} 
+        \item \textit{Accepting/Rejection} and \textit{Deciding}
+        \item \textit{Verification}
+        \item \textit{Reducibility}
+        \item \texttt{P}, \texttt{NP} and \texttt{NPC} (and \texttt{NP-hard})
+    \end{enumerate}
+    \item Introduction to the ham-cycle problem
     \item Introduction to the traveling-salesman problem (TSP)
     \item Proof of TSP being NP-complete.
 \end{enumerate}
 
 \clearpage
 \subsection*{Presentation}
+Hey guys. I will be talking about NP-Completeness. I have here a disposition of the things I will go through *Hand out disposition*. As you can see, mine is identical to yours and it does not contain any information that it is not allowed to *Show own disposition*. First I will be giving this introduction, then I will be giving a brief introduction to various terms that I will be using, then I will be giving an introduction to two problems that are NP-complete, and lastly I will be proving that one of those problems is NP-complete.
+\\
+\\
+An abstract problem is a binary relation on a set $I$ of a problem \textbfit{instance} (or input) and a set of problem \textitbf{solutions} - (each instance can have multiple solutions - think of a graph with multiple shortest paths). In this topic we are only concerned with \textbfit{deicsion problems}: those having a yes/no solution. Thus, we can view an abstract decision problem as a function that maps the instance set $I$ to the solution set $\{0, 1\}$.
+\\
+\\
+An \textitbf{encoding} of a set of abstract objects is a mapping to the set of binary strings. Thus, an algorithm that solves some abstract decision problem actually takes an encoding of a problem instance as input. We say that an algorithm solves a concrete problem in time $O(T(n))$ if, when it is provided a problem instance $i$ of length $n = |i|$, the algorithm can produce the solution in $O(T(n))$ time. I will be using the notation $\langle x \rangle$ to denote the encoding of an instance $x$ of a problem.
+\\
+\\
+We say that an algorithm $A$ \textbfit{accepts} a string $x \in \{0, 1\}^*$ if, given input $x$, the output of the algorithm $A(x) \in \{0, 1\}$ is $1$. The language \textbfit{accpeted} by an algorithm $A$ is thus the set of strings $L = \{x \in \{0, 1\}^* : A(x) = 1\}$.
+\\
+\\
+However, there might strings that never terminates, thus $A$ neither accepts nor rejects them. For this reason we have the term \textbfit{decide}. We say that, if additional all strings not in $L$ are rejected by $A$, that is $A(x) = 0 \text{ for all } x \in \{0, 1\}^* \backslash L$, then $L$ is \textitbf{decided} by $A$. We further say, that $L$ is \textitbf{decided by } $A$ \textbfit{ in polynomial time if } $A$ \textbfit{ decides } $L$ \textitbf{ and runs in polynomial time on all strings}. 
+\\
+\\
+We define a \textit{\textbf{verfirication algorithm}} as being a two-argument algorithm $A$, where one argument is an ordinary input string $x$ and the other is a binary string $y$ called a \textit{\textbf{certificate}}. A two-argument algorithm $A$ \textit{\textbf{verifies}} an input string $x$ if there exists a certificate $y$ such that $A(x, y) = 1$. The \textit{\textbf{language verified}} by a verification algorithm $A$ is
+$$
+L = \{x \in \{0, 1\}^* : \text{ there exists } y \in \{0, 1\}^* \text{ such that } A(x, y) = 1\}.
+$$
+\\
+\\
+Now onto reducability, which is a method for proving that a problem is in a specific complexity class. We say that the language $L_1$ is polynomial-time \textitbf{reducible} to language $L_2$ if there is a polynomial-time computible function $f : \{0, 1\}^* \to \{0, 1\}^*$ such that for all $x \in \{0, 1\}^*$ we have
+$$
+x \in L_1 \Leftrightarrow f(x) \in L_2.
+$$
+In this case, we write $L_1 \leq_P L_2$. This means, that if $L_2 \in P$, then must $L_1$ also be in $P$, since we can just transform any instance of $L_1$ into an instance of $L_2$ in polynomial time and then solve this new instance with a polynomial-time algorithm for $L_2$.
+\\
+\\
+We can now define the various complexity classes. The complexity class $P$ is the set of concrete decision problems that are polynomial-time solvable:
+$$
+P = \{L \subseteq \{0, 1\}^* : \text{ there exists and algorithm } A \text{ that decides } L \text{ in polynomial time}\}.
+$$
+A language $L$ belongs to \textbfit{NP} iff there exist a two-input polynomial-time algorithm $A$ and a constant $c$ such that
+$$
+L = \{x \in \{0, 1\}^* : \text{ there exists a certificate } y \text{ with } |y| = O(|x|^c) \text{ such that } A(x, y) = 1\}.
+$$
+A language $L \subseteq \{0, 1\}^*$ is \textit{\textbf{NP-complete}} if
+\begin{enumerate}
+    \item $L \in NP$, and
+    \item $L' \leq_p L$ for every $L' \in NP$
+\end{enumerate}
+If a language $L$ satisfies property $2$, but not necessarily property $1$, we say that $L$ is \textit{\textbf{NP-hard}}.
+\\
+\\
+Now that I have introduced the various terms, let's get onto some problems. We start off with the Ham-cycle problem. In the ham-cycle problem we are given an undirected graph $G = V, E$. The Ham-cycle problem thus asks, whether $G$ has a hamiltonian cycle - that is, a simple cycle that contains each vertex in $V$, or more precisely
+$$
+HAM-CYCLE = \{\langle G \rangle : G \text{ has a hamiltonian cycle}\}.
+$$
+I will not be giving a proof of this, however, this problem is NP-complete.
+\\
+\\
+Now onto the \textitbf{Traveling-salesman problem} also known as \textitbf{TSP}. In TSP we are given an complete graph $G = (V, E)$ and each edge $(i, j)$ has some cost $c(i, j) \geq 0$ assigned to it. The goal is thus to find a cycle that visits every vertex and returns back to the start vertex, which in total should be of minimal cost. The formal language for the corresponding decision problem is
+\begin{center}
+    \begin{align*}
+        TSP = \{\langle G, c, k \rangle : &G = (V, E) \text{ is a complete graph} \\
+        &c \text{ is a function from } V \times V \to \mathbb{N} \\
+        &k \in \mathbb{N}\\
+        &G \text{ has a traveling-salesman tour with cost at most } k.\}
+    \end{align*}
+\end{center}
+This problem is also NP-complete, which I will be proving now.
+\\
+\\
+We first show that TSP belongs to NP. Given an instance of the problem, we use as a certificate the sequence of $n$ vertices in the tour. The verification algorithm checks that this sequence contains each vertex exactly once, sums up the edge costs, and checks whether the sum is at most $k$, which all in all can be done in polynomial time. \\
+To prove that TSP is NP-hard, we show that $HAM-CYCLE \leq_p TSP$. Let $G = (V, E)$ be an isntance of $HAM-CYCLE$. We construct an instance of TSP as follows. We form the complete graph $G' = (V, E')$, where $E' = \{(i, j) : i, j \in V \text{ and } i \neq j\}$, and we define the cost function $c$ by
+\begin{center}
+    \begin{math}
+        c(i, j) = 
+        \begin{cases}
+            0 & \text{if } (i, j) \in E \\
+            1 & \text{if } (i, j) \notin E.
+        \end{cases}
+    \end{math}
+\end{center}
+The instance of TSP is then $\langle G', c, 0 \rangle$, which we can easily create in polynomial time. \\
+We now show that graph $G$ has a hamiltonian cycle iff $G'$ has a tour of cost at most $+$. Suppose that graph $G$ has a hamiltonian cycle $h$. each edge in $h$ belongs to $E$ and thus has cost $0$ in $G'$. Thus, $h$ is a tour in $G'$ with cost $0$. Conversely, suppose that graph $G'$ has a tour $h'$ of cost at most $0$. Since the costs of the edges in $E'$ are $0$ and $1$, the cost of tour $h'$ is exactly $0$ and each edge on the tour must have cost $0$. Therefore, $h'$ constains only edges in $E$. We conclude that $h'$ is a hamiltonian cycle in graph $G$.
+
+\clearpage
+
+\subsection*{Extra}
+\subsection*{Questions they can ask}
+
 \clearpage
 
 \section*{Exact Exponential Algorithms and Parameterized Complexity}
 \subsection*{Disposition}
 \begin{enumerate}
     \item Introduction
+    \item \textit{Exact exponential algorithms} vs \textit{Parameterized algorithms}
     \item \textit{Travelling salesman problem}:
     \begin{enumerate}
         \item Introduction with example
         \item Naive approach + running time analysis
         \item Dynamic programming - example of running + running time analysis
     \end{enumerate}
-    \item \textit{Bar fight prevention}
+    \item \textit{Bar fight prevention problem}
     \begin{enumerate}
         \item Introduction with example
         \item Naive approach + running time analysis
         \item Kernelization - example of running + running time analysis
     \end{enumerate}
-    \item FPT vs XP
+    \item \textit{Fixed Parameter Tractable} vs \textit{Slice-wise polynomial} problems
 \end{enumerate}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width = 5 cm]{entities/TSP_example.png}
+\end{figure}
+\begin{center}
+    \begin{math}
+        c = 
+        \begin{blockarray}{cccccc}
+              & \text{T} & \text{o} &   & & \\
+            1 & 2 & 3 & 4 & &  \\
+            \begin{block}{[cccc]cc}
+                0 & 10 & 15 & 20 & 1 & \text{F} \\
+                5 & 0 & 9 & 10 & 2 & \text{r} \\
+                6 & 13 & 0 & 12 & 3 & \text{o} \\
+                8 & 8 & 9 & 0 & 4 & \text{m} \\
+            \end{block}
+        \end{blockarray}
+    \end{math}
+\end{center}
 
 \clearpage
 \subsection*{Presentation}
+Hey guys. I will be talking about Exact Exponential Algorithms and Parameterized Complexity. I have here a disposition of the things I will go through *Hand out disposition*. As you can see, mine is identical to yours and it does not contain any information that it is not allowed to *Show own disposition*. First, I will be talking about exact exponential algorithms and parameterized algorithms. Then, I will be talking about the Travelling salesman problem. This is followed by the Bar fight prevention problem. Lastly, I will be talking about Fixed Parameter Tractable and Slice-wise polynomial problems.
+\\
+\\
+First off, what is an \textit{Exact exponential algorithm} and a \textit{Parameterized algorithm}? Well, an Exact exponential algorithm is an exponential algorithm that for all instances find an exact solution. On the other hand, a Parameterized algorithm is an algorithm that for instances with some small fixed values of parameter find an exact solution in polynomial time. Lastly, there are also \textitbf{approximation algorithms} that in polynomial time find an approximation to a solution of all instances, however, I will not be talking about those.
+\\
+\\
+Now that I have introduced the algorithms, I will be talking about some examples. Lets start with the NP-Complete problem called "the Traveling salesman problem", also known as \textitbf{TSP}, which we will be solving using an exact exponential algorithm. In TSP we are given an complete graph $G = (V, E)$ and each edge $(i, j)$ has some cost $c(i, j) \geq 0$ assigned to it. The goal is thus to find a cycle that visits every vertex and returns back to the start vertex, which in total should be of minimal cost.
+\\
+\\
+How would one solve this problem? Well, the naive approach is to just generate all possible solutions and then just use the minimum as solution. This would require $n!$ steps, which of course is very bad. Instead, one can make use of dynamic programming for a faster algorithm. We start off by defining
+$$
+OPT[S, c_i] = "\text{path of minimum length that starts in } c_1 \text{, visits all of } S \text{ once, and end in } c_i
+$$
+for all $S \subseteq \{c_2, ..., c_n\}$ and $c_i \in S$. Then 
+$$
+\min\{\text{OPT}[\{c_2, ..., c_n\}, c_i ] + d(c_i, c_1) | c_i \in \{c_2, ..., c_n\}\}
+$$
+is the length of the minimal tour. Thus, we have
+\begin{center}
+    \begin{math}
+        OPT[S, c_i] = 
+        \begin{cases}
+            d(c_1, c_i) & \text{if } S = \{c_i\} \\
+            \min \{ OPT[S \backslash \{c_i\}, c_k] + d(c_k, c_i) | c_k \in S \backslash \{c_i\} \} & \text{if } \{c_i \} \subset S.
+        \end{cases}
+    \end{math}
+\end{center}
+Now that I have introduced the problem and how to solve the problem using dynamic programming, let's have a look at the example *Write example on blackboard*.
+First we start at the bottom of the recursion tree. Thus, for each vertex that is not $1$, we find the cost of traveling to $1$. In the following $OPT(a, b)$ means, that we are currently at vertex $a$, and we have not visited the vertices in the set $b$. Thus, we have
+$$
+OPT(2, Ø) = 5
+$$
+$$
+Opt(3, Ø) = 6
+$$
+$$
+OPT(4, Ø) = 8
+$$
+Now, we just use these to move up the recursion tree, resulting in
+$$
+OPT(2, \{3\}) = OPT(3, Ø) + c(2, 3) = 6 + 9 = 15
+$$
+$$
+OPT(2, \{4\}) = OPT(4, Ø) + c(2, 4) = 8 + 10 = 18
+$$
+$$
+OPT(3, \{2\}) = OPT(2, Ø) + c(3, 2) = 5 + 13 = 18
+$$
+$$
+OPT(3, \{4\}) = OPT(4, Ø) + c(3, 4) = 8 + 12 = 20
+$$
+$$
+OPT(4, \{2\}) =  OPT(2, Ø) + c(4, 2) = 5 + 8 = 13
+$$
+$$
+OPT(4, \{3\}) = OPT(3, Ø) + c(4, 3) = 6 + 9 = 15.
+$$
+From now on, we actually need to use the $\min$-function, as we have multiple paths that we can take.
+$$
+OPT(2, \{3, 4\}) = \min \{OPT(3, \{4\} + c(2, 3), OPT(4, \{3\} + c(2, 4)\} = \min\{20 + 9, 15 + 10 \} = 25
+$$
+$$
+OPT(3, \{2, 4\}) = \min \{OPT(2, \{4\} + c(3, 2), OPT(4, \{2\} + c(3, 4) \} = \min\{18 + 13, 13 + 12\} = 25
+$$
+$$
+OPT(4, \{2, 3\}) = \min \{OPT(2, \{3\} + c(4, 2), OPT(3, \{2\} + c(4, 3)\} = \min\{15 + 8, 18 + 9\} = 23
+$$
+Lastly, we have
+$$
+OPT(1, \{2, 3, 4\}) = \min\{OPT(2, \{4, 3\} + c(1, 2), OPT(3, \{2, 4\}) + c(1, 3), OPT(4, \{2, 3\} + c(1, 4)\}
+$$
+$$
+= \min\{25 + 10, 25 + 15, 23 + 20\} = 35.
+$$
+Now, we need to find the path that actually leads to this. To do so, we just simply follow the elements, that meet the $\min$'s. By doing so we find the bath $1, 2, 4, 3$.
+
 \clearpage
 
 \section*{Approximation Algorithms}
