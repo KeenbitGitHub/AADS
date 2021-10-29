@@ -1498,7 +1498,7 @@ Given an instance of MAX-3-CNF satisfiability with $n$ variables $x_1, x_2, ...,
 \textit{\textbf{proof}} Suppose that we have independently set each variable to $1$ with probability $1/2$ and to 0 with probability $1/2$. For $i = 1, 2, ..., m$, we define the indicator random variable
 $$Y_i = I\{\text{clause } i \text{ is satisfied}\}$$
 so that $Y_i = 1$ as long as we have set at least one of the literals in the $i$th clause to $1$. Since no literal appears more than once in the same clause, and since we have assumed that no variable and its negation appear in the smae clause, the settings of the three literals in each clause are independent. A clause is not satisfied only if all three of its literals are set to $0$, and so $Pr\{\text{clause } i \text{ is not satisfied}\} = (1/2)^3 = 1/8$. Thus, we have $Pr\{\text{clause } i \text{ is satisfied}\} = 1 - 1/8 = 7/8$, and $E[Y_i] = 7/8$. Let $Y$ be the number of satisfied clauses overall, so that $Y= Y_1 + Y_2 + ... + Y_m$. Then, we have
-$$E[Y] = E \left[ \sum_{i = 1} ^m Y_i \right] = \sum_{i = 1} ^m E[Y_i] = \sum_{i=1} ^m 7/8 = 7m/8$$.
+$$E[Y] = E \left[ \sum_{i = 1} ^m Y_i \right] = \sum_{i = 1} ^m E[Y_i] = \sum_{i=1} ^m 7/8 = 7m/8.$$
 Clearly, $m$ is an upper bound on the number of satisfied clauses, and thence the approximation ratio is at most $m/(7m/8) = 8/7$.
 
 \subsubsection*{Theorem 35.7}
@@ -1543,9 +1543,10 @@ Placing cameras at vertices seems better, because a vertex can be incident to ma
 To find such a subset we assign each vertex of $\mathcal{P}$ a color: white, grey or black. The coloring will be such that any vertices connected by an edge or a diagonal have different colors. this is called a \textit{3-coloring} of a triangulated polygon. In a 3-coloring of a triangulated polygon, every triangle has a white, black and gray vertex. Hence, if we place cameras at all gray vertics, say, we have guarded the whole polygon. By choosing the smallest color class to place the cameras, we guard $\mathcal{P}$ using at most $\left \lfloor \frac{n}{3} \right \rfloor$ cameras.
 \\
 \\
-Let $P$ be a simple polygon with $n$ vertices. A set of $\left \lfloor \frac{n}{3} \right \rfloor$ camera position in The 3-coloring approach is optimal in worst case such that any point inside The 3-coloring approach is optimal in worst case is visible from at least one of the cameras can be computed in $O(n \log n)$ time.
+Let $P$ be a simple polygon with $n$ vertices. A set of $\left \lfloor \frac{n}{3} \right \rfloor$ camera position in such that any point inside is visible from at least one of the cameras can be computed in $O(n \log n)$ time.
 \\
-The previous triangulation algorithm will take quadratic time in worst case. This can be improved for some classes of polygons. For instance, convext polygons: Pick one vertex and draw diagonals from every other vertex, that is nto a neighbor, to the vertex. This runs in linear time. Thus, a possible solution would be to decompose The 3-coloring approach is optimal in worst case into convext pieces and then triangulate the pieces. However, it is difficult to partition a polygon into convex pieces. Therefore, we shall decompose The 3-coloring approach is optimal in worst case into \textit{monotone pieces}, which is a lot easier.
+\\
+The previous triangulation algorithm will take quadratic time in worst case. This can be improved for some classes of polygons. For instance, convext polygons: Pick one vertex and draw diagonals from every other vertex, that is nto a neighbor, to the vertex. This runs in linear time. Thus, a possible solution would be to decompose into convext pieces and then triangulate the pieces. However, it is difficult to partition a polygon into convex pieces. Therefore, we shall decompose into \textit{monotone pieces}, which is a lot easier.
 \\
 \\
 A simple polygon is called \textit{monotone with respect to a line} $L$ if for any line $L'$ perpendicular to $L$, the intersection of the polygon with $L'$ is connected. A polygon that is monotone with respect to the y-axis is called \textit{y-monotone}. The following property is characteristic for y-monotone polygons: if we walk from

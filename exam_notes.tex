@@ -800,6 +800,7 @@ We now show that graph $G$ has a hamiltonian cycle iff $G'$ has a tour of cost a
         \item Introduction with example
         \item Naive approach + running time analysis
         \item Kernelization - example of running + running time analysis
+        \item Bounded Search tree - example of running + running time analysis
     \end{enumerate}
     \item \textit{Fixed Parameter Tractable} vs \textit{Slice-wise polynomial} problems
 \end{enumerate}
@@ -899,7 +900,49 @@ $$
 $$
 = \min\{25 + 10, 25 + 15, 23 + 20\} = 35.
 $$
-Now, we need to find the path that actually leads to this. To do so, we just simply follow the elements, that meet the $\min$'s. By doing so we find the bath $1, 2, 4, 3$.
+Now, we need to find the path that actually leads to this. To do so, we just simply follow the elements, that meet the $\min$'s. By doing so we find the path $(1, 2, 4, 3)$. This algorithm using dynamic programming has a runtime of $O(n^2 \cdot 2^n)$, which is far better than the previous algorithm's runtime of $O(n!)$. 
+\\
+\\
+Now, let's get into the \textbfit{Bar fight prevention problem}, which we will be solving using a parameterized algorithm. In the Bar fight prevention problem, a bouncer has to block at most $k$ of $n$ people at the door to prevent fights. The problems then asks who should be blocked such that this is possible?
+\\
+\\
+We can view this problem as a graph $G = (V, E)$ of people, where each vertex $v \in V$ is a person, and each edge $(i, j) \in E$ between to people $i, j \in V$ means that person $i$ and $j$ will start a fight if they are at the bar at the same time. The goal is thus to figure out if we have an integer $k$ and a \textitbf{vertex cover} $C$, that is a set of vertices that inclues at least on endpoint of every edge of $G$, such that $|C| \leq k$. This problem is NP-complete. To solve it, one could use the naive approach of just bruce-forcing it by trying all $2^n$ subsets of vertices, which runs in $O(2^k)$. However, there is a smarter approach.
+\\
+\\
+First off, let's let $d(v)$ for all $v \in V$ be the degree of $v$, let $k$ be a counter for how many people are yet allowed to block at the door and $G$ be a graph of all of the people we have not yet decided wether they should be blocked or not. We then use the following $3$ ideas:
+\begin{enumerate}
+    \item we have, that if $d(v) = 0$, then we can let $v$ in and drop $v$ from $G$, since $v$ does not have any conflicts
+    \item  if $d(v) \geq k + 1$, then we decreaste $k$ by $1$, remove $v$ from $G$ and and reject $v$, since if were not to do this, then we would have to reject all of $v$'s $k+1$, or more, neighbors instead, which would contradict our goal of rejecting at most $k$ people.
+    \item If a vertice $v \in V$ only has one neighbor $w \in V \backslash v$, then we remove $v, w$ from $G$, decrease $K$ by $1$, accept $v$ and reject $w$. This is because we know, that $w$ cannot have less neighbors than $v$ and we cannot accept both $v$ and $w$.
+\end{enumerate}
+By doing this we end up with $|V| \leq k^2$, because
+$$
+|V| = \sum_{v \in V} 1 = \frac{1}{2} \sum_{v \in V} 2 \leq \frac{1}{2} d(v) \leq k^2.
+$$
+We can the brute-force the remaining graph by trying all $\binom{k^2}{k}$ subsets of $k$ people.
+\\
+\\
+Therefore, instead of using brute force to go through an enormous search space, we use simple observations to reduce the search space to a manageable size. This algorithmic technique, using reduction rules to decrease the size of the instance, is called \textit{kernelization}. The general idea is to use the parameter $k$ to quickly reduce to a smaller subproblem of the same type, whose size ideally depends only on $k$ and not on $n$.
+\\
+\\
+Thus, we have shown taht if there is a solution for a given $k$ and a given graph $G$ with $n$ vertices and $m$ edges, then we can find a kernel $H$ with at most $k^2$ vertices. Furthermore, such a kernel can be found in $O(m + n)$ time, and checking if a given subset of size at most $k$ is a solution can be done in $O(k^2)$ time. Thus, for any fixed $k$, the total running time of this algorithm is
+$$
+O(m + n + \binom{k^2}{k} k^2).
+$$
+This can be improved further by using a Bounded Search Tree. The important observation here is, that for each edge $(u, v) \in E$, at least one of $u, v$ must be rejected. The idea is then to pick an arbitrary edge $(u, v)$, reject $u$ and run the algorithm recursively to check whether the remaining conflicts can be resolved by rejecting at most $k - 1$ guests. If this succeeds you already have a solution. If it fails, then move $u$ back into the undecided list, move $v$ to the reject list and run the algorithm recursively to check whether the remaining conflicts can be resolved by tejecting at most $k - $ additional guests. If this recursive call also fails to find a solution, then you can be sure that there is no way to avoid a fight by rejecting at most $k$ guests.
+\\
+\\
+This procedure results in a recursion tree of depth $k$, thus there is a total of $2^k$ recursive calls. If we start by rejecting all vertices of degree $d(v) \geq k + 1$, the resulting graph has at most $|E| = \frac{1}{2} \sum_{v \in V} d(v) \leq \frac{1}{2} nk$ edges, so constructing each recursive call can be done in $O(nk)$ time. The total running time is then $O(m + nk \cdot 2^k)$.
+\\
+\\
+An important feature of the Bar Fight Prevention problem is the existence of the parameter $k$. The problem of finding the minimum $k$ that works is NP-complete, but for any fixed constant $k$ we have just seen two linear-time algorithms. We say the problem is \textit{parameterized by the parameter k}.
+\\
+\\
+A parameterized problem is \textit{Fixed Parameter Tractable (FPT)} if it has an algorithm with running time $f(k) \cdot n^c$ for some function $f$ and some constant $c \in \mathbb{R}$
+\\
+\\
+A parameterized problem is \textit{Slice-wise Polynomial (XP)} if it has an algorithm with running time $f(k) \cdot n^{g(k)}$ for some function $f, g$. We have $FPT \subset XP$, because we can just let $g(k) = c$.
+% MANGLER NOGLE EKSEMPLER
 
 \clearpage
 
@@ -907,6 +950,7 @@ Now, we need to find the path that actually leads to this. To do so, we just sim
 \subsection*{Disposition}
 \begin{enumerate}
     \item Introduction
+    \item Motivation behind approximation algorithms
     \item Definition of the \textit{approximation ratio}, a $\rho(n)$\textit{-approximation algorithm} and a \textit{randomized} $\rho(n)$\textit{-approximation algorithm}.
     \item The Vertex-cover problem
     \begin{enumerate}
@@ -922,58 +966,66 @@ Now, we need to find the path that actually leads to this. To do so, we just sim
 
 \clearpage
 \subsection*{Presentation}
-\textbf{Definition of \textit{approximation ratio}} \\
+Hey guys. I will be talking about approximation algorithms. I have here a disposition of the things I will go through *Hand out disposition*. As you can see, mine is identical to yours and it does not contain any information that it is not allowed to *Show own disposition*. First, I will be giving a brief motivation behind approximation algorithms. This is then followed by an definition of som terms that I will be using. Lastly, I will be covering two different approximation algorithms.
+\\
+\\
+So, why do we care about approximation algorithms? Well, in many application we want a solution that runs in polynomial time, however, this is not always possible. However, instead an approximation of the actual solution is fine, which is often possible to find in polynomial time, which is why we sometimes decide just to use an approximation algorithm instead.
+\\
+\\
 We say that an algorithm for a problem has an \textit{\textbf{approximation ratio}} of $\rho(n)$ if, for any input of size $n$, the cost $C$ of the solution produced by the algorithm is within a factor of $\rho(n)$ of the cost $C^*$ of an optimal solution
-$$
-\max \left( \frac{C}{C^*}, \frac{C^*}{C} \right) \leq \rho(n).
-$$
-\textbf{Definition of \textit{$\rho(n)$-approximation algorithm}} \\
+\begin{equation}
+    \max \left( \frac{C}{C^*}, \frac{C^*}{C} \right) \leq \rho(n).
+\end{equation}
 If an algorithm achieves an approximation ratio of $\rho(n)$, we call it a \textit{\textbf{$\rho(n)$-approximation algorithm}}.
 \\
 \\
-\textbf{Definition of \textit{randomized} $\rho(n)$\textit{-approximation algorithm}} \\
-We say that a randomized algorithm for a problem has an \textit{\textbf{approximation ratio}} of $\rho(n)$ if, for any input of size $n$, the expected cost $C$ of the solution procuded by the randomized algorithm is within a factor of $\rho(n)$ of the cost $C^*$ of an optimal solution:
+Likewise, we say that a randomized algorithm for a problem has an \textit{\textbf{approximation ratio}} of $\rho(n)$ if, for any input of size $n$, the expected cost $C$ of the solution procuded by the randomized algorithm is within a factor of $\rho(n)$ of the cost $C^*$ of an optimal solution:
 $$
 \max \left( \frac{C}{C^*}, \frac{C^*}{C} \right) \leq \rho(n).
 $$
 We call a randomized algorithm that achieves an approximation ratio of $\rho(n)$ a \textit{\textbf{randomized $\rho(n)$-approximation algorithm}}
 \\
 \\
-\textbf{Introduction to \textit{vertex cover}} \\
-\noindent A \textit{\textbf{vertex cover}} of an undirected graph $G = (V, E)$ is a subset $V' \subseteq V$ such that if $(u, v)$ is an edge of $G$, then either $u \in V'$ or $v \in V'$ (or both). The size of a vertex cover is the number of vertices in it. The \textit{\textbf{vertex-cover problem}} is to find a vertex cover of minimum size in a given undirected graph. We call such a vertex cover an \textit{\textbf{optimal vertex cover}}. 
+Now that I have introduced some basic terms, let's get into the examples. Let's start with the \textitbf{vertex cover problem}. A \textitbf{vertex cover} of an unidrected graph $G = (V, E)$ is a subset $V' \subseteq V$, such that if $(u, v)$ is an edge of $G$, then either $u \in V'$ or $v \in V'$ (or both). The goal of the vertex cover problem is thus to find a vertex cover of minimum size in a given undirected graph. Finding such a graph is NP-complete, however, we can use an approximation algortihm to find a vertex cover whose size is no more than twice the size of the optimal vertex cover, using a running time of $O(V + E)$, using adjacency lists to represent $E$. The algorithm works by continuously picking an arbitrary edge $(u, v)$, saving $u$ and $v$ in a set $C$, and removing $(u, v)$ and all other edges incident on either $u$ or $v$ from $G$. This is done untill $G$ has no edges left.
 \\
 \\
-\noindent The set $C$ of vertices that is returned by \texttt{APPROX-VERTEX-COVER} is a vertex cover, since the laogrithm loops until every edge in $G.E$ has been covered by some vertex in $C$.
-\begin{algorithm}[htbp]
-    \caption{APPROX-VERTEX-COVER}
-    \begin{algorithmic}[1]
-        \Require Undirected graph $G$
-        \State $C = \emptyset$
-        \State $E' = G.E$
-        \While{$E' \neq \emptyset$}
-            \State let $(u, v)$ be an arbitrary edge of $E'$
-            \State $C = C \cup \{u, v\}$
-            \State remove from $E'$ edge $(u, v)$ and every edge incident on either $u$ or $v$
-        \EndWhile
-        \State \textbf{return} $C$
-    \end{algorithmic}
-\end{algorithm}
+Let's look at an example of this
+% SHOW EXAMPLE
+\\
+\\
+Now that we have the algorithm introduced, let's prove, that the returned vertex cover is at most twice at big as the optimal vertex cover. 
+\\
+\\
+The set $C$ of vertices that is returned by the algorithm is a vertex cover, since the algorithm loops until every edge in $E$ has been covered by some vertex in $C$. To see that the algorithm returns a vertex cover that is at most twice the size of an optimal cover, let $A$ denote the set of edges that are picked. In order to cover the edges in $A$, the optimal cover $C^*$ must include at least one endpoint of each edge in $A$. No two edges in $A$ share an endpoint, since once an edge is picked all other edges that are incident on it sendpoints are deleted from $E$. Thus, no two edges in $A$ are covered by the same vertex from $C^*$, and we have
+$$
+|C^*| \geq |A|.
+$$
+Each iteration picks an edge for which neither of its endpoints is already in $C$, yielding an exact upper bound on the size of the vertex cover returned
+$$
+|C| = 2|A|.
+$$
+Thus, we have
+$$
+|C| = 2|A| \leq 2|C^*|.
+$$
+Thus, we have, that the algorithm is a $2$-approximation algorithm.
+\\
+\\
+Now that we have solved a problem using a non-random approximation algorithm, let's instead solve a problem using a random approximation algorithm. The problem we will solve is the \textitbf{MAX-3-CNF satisfiability problem}. Let me start off by explaining the problem. In 3-CNF-SAT, we are asked whether a given boolean formula in 3-CNF is satisfiable. We say that a boolean formula is in \textitbf{3-CNF} if it is expressed as an AND of clauses, each of which is the OR of one or more literals, where each clause has exactly three distinct literals and a \textitbf{literal} is a variable or its negation. For the boolean formula to be satisfiable, there must exist an assignment of the variables so that every clause evaluates to $1$, which is NP-complete. In the approximation problem \textitbf{MAX-3-CNF satisfiability}, we instead wish to find an assignment of the variables that satisfies as many clauses as possible. The input to MAX-3-CNF satisfiability is thus a boolean formula of $n$ variables and $m$ clauses, and the goal is goal is to return an assignment of the variables that maximizes the number of clauses evaluating to $1$.
+\\
+\\
+To solve this problem by randomly setting each variable to $1$ with probability $1/2$ and to $0$ with probability $1/2$, which yields a randomized $8/7$-approximation algorithm. We require each clause to consist of exactly three distinct literals, and we assume that no clause contains both a variable and its negation. I will now prove, that this randomized algorithm is a randomized $8/7$-approximation algorithm.
+\\
+\\
+Suppose that we have independently set each variable to $1$ with probability $1/2$ and to 0 with probability $1/2$. For $i = 1, 2, ..., m$, we define the indicator random variable
+$$Y_i = I\{\text{clause } i \text{ is satisfied}\}$$
+so that $Y_i = 1$ as long as we have set at least one of the literals in the $i$th clause to $1$. Since no literal appears more than once in the same clause, and since we have assumed that no variable and its negation appear in the smae clause, the settings of the three literals in each clause are independent. A clause is not satisfied only if all three of its literals are set to $0$, and so $Pr\{\text{clause } i \text{ is not satisfied}\} = (1/2)^3 = 1/8$. Thus, we have $Pr\{\text{clause } i \text{ is satisfied}\} = 1 - 1/8 = 7/8$, and $E[Y_i] = 7/8$. Let $Y$ be the number of satisfied clauses overall, so that $Y= Y_1 + Y_2 + ... + Y_m$. Then, we have
+$$E[Y] = E \left[ \sum_{i = 1} ^m Y_i \right] = \sum_{i = 1} ^m E[Y_i] = \sum_{i=1} ^m 7/8 = 7m/8.$$
+Clearly, $m$ is an upper bound on the number of satisfied clauses, and hence why the approximation ratio is at most $m/(7m/8) = 8/7$.
+\\
+\\
+We thus have, that the approximation algorithm is a $8/7$-approximation algorithm.
 
-\noindent \textbf{Proof that \texttt{APPROX-VERTEX-COVER} is a 2-approximation algorithm} \\
-Let $A$ denote the set of edges that line $4$ picked. Not two edges in $A$ share an endpoint. Thus no two edges in $A$ are covered by the same vertex from an optimal cover $C^*$, and we have the lower bound
-\begin{equation}
-    \label{eqn:vertex_cover_optimal_lower_bound}
-    |C^*| \geq |A|
-\end{equation}
-on the size of an optimal vertex cover. Since $A$ consists of the edges between two vertices in $C$ (and since all of the elements in $C$ are unique), we have the (exact) upper bound on the size of the vertex cover returned
-\begin{equation}
-    \label{eqn:vertex_cover_returned_upper_bound}
-    |C| = 2|A|
-\end{equation}
-Combining equation (\ref{eqn:vertex_cover_optimal_lower_bound}) and (\ref{eqn:vertex_cover_returned_upper_bound}), we obtain
-$$|C| = 2|A| \leq 2|C^*|$$
-
-% MANGLER INTRODUCTION, MAX-3-CNF OG MÅSKE ET KORT EKSEMPEL PÅ ET VERTEX COVER
 
 \clearpage
 
@@ -981,6 +1033,7 @@ $$|C| = 2|A| \leq 2|C^*|$$
 \subsection*{Disposition}
 \begin{enumerate}
     \item Introduction
+    \item Introduction to the Art Gallary Problem.
     \item The 3-coloring approach
     \begin{enumerate}
         \item Example on running the algorithm
@@ -992,6 +1045,21 @@ $$|C| = 2|A| \leq 2|C^*|$$
 
 \clearpage
 \subsection*{Presentation}
+Hey guys. I will be talking about polygon triangulation. I have here a disposition of the things I will go through *Hand out disposition*. As you can see, mine is identical to yours and it does not contain any information that it is not allowed to *Show own disposition*. First, I will be giving this brief introduction. Then, I will be giving an introduction to the problem we are trying to solve. This is followed by me talking about the optimal approach in worst case. Lastly, I will be presenting another linear approach.
+\\
+\\
+The problem we are trying to solve is the so-called \textit{Art Gallary problem}, which asks "how many cameras do we need to guard a given gallary and where do we decide to place them?". We model a gallary as a polygonal region in the plane. We further restrict ourselves to polygons that are \textit{simple polygons}, that is, a polygon of a single chain that does not intersect itself.
+\\
+\\
+In the $3$-coloring apprach we let $T_\mathcal{P}$ be a triangulation of the simple polygon $\mathcal{P}$, select a subset of vertices of $\mathcal{P}$, such that any triangle of $T_\mathcal{P}$ has at least one selected vertex, and then we place the cameras at the selected vertices.
+\\
+\\
+We do the triangulation, since triangles are easy to guard. The triangulation is done by finding a maximal set of non-intersecting diagonals between pairs of vertices. We require that the set of non-intersecting diagonals to be maximal to ensure that no triangle has a polygon vertex in the interior of one of its edges. We place the cameras at vertices, since a vertex can be incident to many triangles, and a camera at that vertex then guards all of them.
+\\
+\\
+To find the subset we assign each vertex of $\mathcal{P}$ a color: white, grey or black. The coloring will be such that any vertices connected by an edge or a diagonal have different colors. this is called a \textit{3-coloring} of a triangulated polygon. In a 3-coloring of a triangulated polygon, every triangle has a white, black and gray vertex. Hence, if we place cameras at all gray vertics, say, we have guarded the whole polygon. By choosing the smallest color class to place the cameras, we guard $\mathcal{P}$ using at most $\left \lfloor \frac{n}{3} \right \rfloor$ cameras. In fact, this appraoch is optimal in worst case, which I will prove now.
+
+
 \clearpage
 
 \end{document}
