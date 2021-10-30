@@ -1036,11 +1036,20 @@ We thus have, that the approximation algorithm is a $8/7$-approximation algorith
     \item Introduction to the Art Gallary Problem.
     \item The 3-coloring approach
     \begin{enumerate}
-        \item Example on running the algorithm
-        \item Proving that the 3-coloring approach is optimal in worst case
+        \item Introduction
+        \item Runtime analysis
     \end{enumerate}
-    \item Example on partitioning a polygon into monotone pieces + runtime analysis
-    \item Example on triangulating a monotone polygon + runtime analysis
+    \item Monotone pieces + triangulation
+    \begin{enumerate}
+        \item Motivation
+        \item \textit{Split}, \textit{merge}, \textit{start}, \text{end} and \text{regular vertices}
+        \item Runtime analysis
+    \end{enumerate}
+    \item Conclusion on the Art Gallary Problem:
+    \begin{enumerate}
+        \item Final runtime
+        \item Example on running the algorithm
+    \end{enumerate}
 \end{enumerate}
 
 \clearpage
@@ -1048,17 +1057,62 @@ We thus have, that the approximation algorithm is a $8/7$-approximation algorith
 Hey guys. I will be talking about polygon triangulation. I have here a disposition of the things I will go through *Hand out disposition*. As you can see, mine is identical to yours and it does not contain any information that it is not allowed to *Show own disposition*. First, I will be giving this brief introduction. Then, I will be giving an introduction to the problem we are trying to solve. This is followed by me talking about the optimal approach in worst case. Lastly, I will be presenting another linear approach.
 \\
 \\
-The problem we are trying to solve is the so-called \textit{Art Gallary problem}, which asks "how many cameras do we need to guard a given gallary and where do we decide to place them?". We model a gallary as a polygonal region in the plane. We further restrict ourselves to polygons that are \textit{simple polygons}, that is, a polygon of a single chain that does not intersect itself.
+The problem we are trying to solve is the so-called \textit{Art Gallary problem}, which asks "how many cameras do we need to guard a given gallary and where do we decide to place them?". We model a gallary as a polygonal region in the plane. We further restrict ourselves to polygons that are \textit{simple polygons}, that is, a polygon of a single chain that does not intersect itself and without any holes.
 \\
 \\
 In the $3$-coloring apprach we let $T_\mathcal{P}$ be a triangulation of the simple polygon $\mathcal{P}$, select a subset of vertices of $\mathcal{P}$, such that any triangle of $T_\mathcal{P}$ has at least one selected vertex, and then we place the cameras at the selected vertices.
 \\
 \\
-We do the triangulation, since triangles are easy to guard. The triangulation is done by finding a maximal set of non-intersecting diagonals between pairs of vertices. We require that the set of non-intersecting diagonals to be maximal to ensure that no triangle has a polygon vertex in the interior of one of its edges. We place the cameras at vertices, since a vertex can be incident to many triangles, and a camera at that vertex then guards all of them.
+We do the triangulation, since triangles are easy to guard. We place the cameras at vertices, since a vertex can be incident to many triangles, and a camera at that vertex then guards all of them.
 \\
 \\
-To find the subset we assign each vertex of $\mathcal{P}$ a color: white, grey or black. The coloring will be such that any vertices connected by an edge or a diagonal have different colors. this is called a \textit{3-coloring} of a triangulated polygon. In a 3-coloring of a triangulated polygon, every triangle has a white, black and gray vertex. Hence, if we place cameras at all gray vertics, say, we have guarded the whole polygon. By choosing the smallest color class to place the cameras, we guard $\mathcal{P}$ using at most $\left \lfloor \frac{n}{3} \right \rfloor$ cameras. In fact, this appraoch is optimal in worst case, which I will prove now.
-
+To find the subset we assign each vertex of $\mathcal{P}$ a color: white, grey or black. The coloring will be such that any vertices connected by an edge or a diagonal have different colors. this is called a \textit{3-coloring} of a triangulated polygon. In a 3-coloring of a triangulated polygon, every triangle has a white, black and gray vertex. Hence, if we place cameras at all gray vertics, say, we have guarded the whole polygon. By choosing the smallest color class to place the cameras, we guard $\mathcal{P}$ using at most $\left \lfloor \frac{n}{3} \right \rfloor$ cameras. We can compute the set of at most $\left \lfloor n/3 \right \rfloor$ camera positions in linear time by using depth first search on the dual graph to compute a 3-coloring and take the smallest color class to place the cameras.
+\\
+\\
+But we need a fast algortihm for triangulating a simple polygon. For convex polygons we can just pick one vertex and draw diagonals from this vertex to all other vertices except it neighbors. For non-convex polygons we decompose the polygon into so-called $y$-monotone pieces, and then triangulate the pieces. A simple polygon is \textit{y-monotone} iff any horizontal line intersects it in a connected set or not at all.
+\\
+\\
+We can partition a polygon into monotone pieces by removing all \textit{turn vertices}, that is vertices where there is a change in the direction of the vertical walk from the top of the polygon to the bottom of the polygon. There are $4$ types of turn vertices:
+\begin{enumerate}
+    \item \textit{Start vertex}: If the two neighbors lie below it and the interior angle is less than $\pi$.
+    \item \textit{Split vertex}: If the two neighbors lie below it and the interior angle is greater than $\pi$
+    \item \textit{End vertex}: If its two neighbors lie above it and the interior angle is less than $\pi$.
+    \item \textit{Merge vertex}: If its two neighbors lie above it and the interior angle is greater than $\pi$.
+\end{enumerate}
+Lastly, there are also the \textit{Regular vertices}, which are vertices where one of its neighbors is above it and the other neighbor is below it.
+\\
+\\
+Now that I have introduced the various types of vertices, let's look at how we can remove each of the different types of turn vertices.
+\begin{itemize}
+    \item Split vertex: We use a plane sweep method. The algorithm moves a line downward over the plane. The goal of the sweep is to add diagonals from each split vertex to a vertex lying above it. For a split vertex $v_i$ let $e_j$ be the edge immediately to the left of $v_i$ on the sweep line, and let $e_k$ be the edge immediately to the right of $v_i$ on the sweep line. Then we can always conenct $v_i$ to the lowest vertex in between $e_j$ and $e_k$, and above $v_i$. If there is no such vertex then we can connect $v_i$ to the upper endpoint of $e_j$ or to the upper endpoint of $e_k$. This vertex is called the \textit{helper} of $e_j$ and is denoted by $helper(e_j)$.
+    \item Merge vertex: Now we know how to get rid of split vertices. What about merge vertices. Suppose the sweep line reaches a merge vertex $v_i$. let $e_j$ and $e_k$ be the edge simmediately to the right and left of $v_i$ on the sweepline. Observe that $v_i$ becomes the new helper of $e_j$ when we reach it. We would like to connect $v_i$ to the highest vertex below the sweep line in between $e_j$ and $e_k$. We do not know the highest vertex below the sweep line when we reach $v_i$. But it is easy to find later on: when we reach a vertex $v_m$, that replaces $v_i$ as the helper of $e_j$, then this is the vertex we are looking for. So whenever we replace the helper of some edge, we check whether the old helper is amerge vertex and, if so, we add the diagonal between the old helper and the new one. This diagonal is always added when the new helper is a split vertex, to get rid of the split vertex. It can also happen that the helper of $e_j$ is not replaced anymore below $v_i$. In this case we can connect $v_i$ to the lower endpoint of $e_j$.
+\end{itemize}
+We store the event points in an event queue. The event queue is a priority queue, where the priority of a vertex is its $y$-coordinate. Thus, to make the polygon into monotone pieces we continuously remove the vertex with the highest priority from the event queue and handle the vertex depending on its type. What is the running time of this algorithm? The algorithm is upperbounded by the priority queue which handles events in $O(\log n)$ time. Thus, the total algorithm runs in $O(n \log n)$. 
+\\
+\\
+Now that we know how to partition a simple polygon into $y$-monotone pieces, we should take a look at how to triangulate the monotone polygons. We let $\mathcal{P}$ be an y-monotone polygon with $n$ vertices. We assume that $\mathcal{P}$  is \textit{strictly y-monotone}, that is, it does not contain horizontal edges.
+\\
+\\
+The triangulation algorithm handles the vertices in order of decreasing y-coordinate. The algorithm starts off by initializing a stack and pushing the first two vertices onto the stack. The more recently a vertex has been encountered, the high on the stack it is. The algorithm works by continuously taking the next vertex $v$ and add as many diagonals from this vertex to vertices on the stack as possible, while popping the vertices from the stack. This is the followed by pushing $v$ onto the stack.
+\\
+\\
+I will not be going into too much details with the running time of the algortihm, but the algorithm simply runs through the sequence of vertices of the polygon, making the algorithm have a running time of $O(n)$.
+\\
+\\
+Thus, we can triangulate a simple polygon with $n$ vertices in $O(n \log n)$ time. Remember, we can use the 3-coloring approach to place cameras in linear time, so in total we can solve the Art Gallary problem in $O(n \log n)$ time with $\left \lfloor n/3 \right \rfloor$ cameras.
+\\
+\\
+Now that I have talked about the algorithms, let me run a short example. We are given the following example *Write example on black board*, which we first off split into monotone pieces. By doing so we get the following result
+\begin{figure*}[h]
+    \centering
+    \includegraphics[width = 6 cm]{entities/polygon_monotoned.png}
+\end{figure*}
+Now, we should triangulize the polygon. However, due to time limits I will only be using the big figure on the left. By triangulizing this pieces and coloring the nodes we get
+\begin{figure*}[h]
+    \centering
+    \includegraphics[width = 6 cm]{entities/polygon_final.png}
+\end{figure*}
+We thus have $4$ red nodes, $2$ yellow nodes and $2$ green nodes. Thus, optimal solution for this pieces would be to place cameras at each othe yellow nodes or at each of the green nodes.
 
 \clearpage
 
