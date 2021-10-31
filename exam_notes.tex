@@ -596,6 +596,7 @@ Where, we in the first inequality use union bound: the probability that at least
 \subsection*{Disposition}
 \begin{itemize}
     \item Introduction
+    \item Motivation behind van Emde Boas Trees
     \item Introduction to the structure of van Emde Boas Trees
     \item Example on running \texttt{Member}(4), \texttt{Insert}(6) and \texttt{Predecessor}(4) on the example.
     \item Proof of Running-time
@@ -607,13 +608,14 @@ Where, we in the first inequality use union bound: the probability that at least
 $$
 \{1, 4, 5, 7\} = \{0001_2, 0100_2, 0101_2, 0111_2\}
 $$
+% SKAL NOK VÆRE LÆNGERE PÅ EN ELLER ANDEN MÅDE
 
 \clearpage
 \subsection*{Presentation}
 Hey guys. I will be talking about van Emde Boas Trees . I have here a program of the things I will go through *Hand out program*. As you can see, mine is identical to yours and it does not contain any information that it is not allowd to *Show own program*. First, I will be giving a brief introduction to the topic. Then I will be talking about the structure of the tree. This is followed by me running various procedures on the data structure. Lastly, I will be giving a proof of the running time of the various procedures.
 \\
 \\
-Van Emde Boas Trees store integers in the range $[0, u - 1]$, where $u$ is an exact power of $2$, without any duplicates.
+Van Emde Boas Trees store integers in the range $[0, u - 1]$, where $u$ is an exact power of $2$, without any duplicates. The data structure exploits this knowledge about the range of the keys to get a runtime of operations that is $O(\log \log u)$, which I will prove later.
 \\
 \\
 The van Emde Boas Tree is a recursive data structure. Each node with $u > 2$, has the following structure
@@ -621,25 +623,18 @@ The van Emde Boas Tree is a recursive data structure. Each node with $u > 2$, ha
     \item A field $u$ denoting the universe size $u$
     \item A field $min$ that stores the minimum element in the vEB tree
     \item A field $max$ that stores the maximum element in the vEB tree
-    \item A field $Summary$ that points to a summary node, that shows shows whether other clusters contains any elements.
-    \item An array $cluster$ of pointers that points to sub-vEB trees, each of size $\sqrt[\downarrow]{u}$.
+    \item A field $Summary$ that points to a summary node, that shows shows whether other clusters contains any elements. This nodes has a size of $\sqrt[\uparrow]{u}$.
+    \item An array $cluster$ of pointers that points to $\sqrt[\uparrow]{u}$ sub-vEB trees, each of size $\sqrt[\downarrow]{u}$.
 \end{enumerate}
 If $u = 2$, then it only has $u$, $min$ and $max$ as its fields.
-\begin{figure*}[h]
-    \centering
-    \includegraphics[width = 6 cm]{entities/veb_node.PNG}
-\end{figure*}
 \\
 \\
-For vEB trees we have the following equations which are important for the sturcutre
-$$\sqrt[\uparrow]{u} = 2^{\left \lceil (\lg u)/2 \right \rceil}$$
-and
-$$\sqrt[\downarrow]{u} = 2^{\left \lfloor (\lg n)/2 \right \rfloor}.$$
-Then we define the following functions
+For vEB trees we have the following definitions which are important for the structure
 \begin{enumerate}
-    \item $high(x) = \left \lfloor \frac{x}{\sqrt[\downarrow]{u}} \right \rfloor$: The high half of $x$'s bits
-    \item $low(x) = x \text{ mod } \sqrt[\downarrow]{u}$: The low half of $x$'s bits
-    \item $index(x, y) = x \sqrt[\downarrow]{u} + y$: The value of element at cluster $x$ index $y$.
+    \item $\sqrt[\uparrow]{u} = 2^{\left \lceil \frac{\log u}{2} \right \rceil}$
+    \item $\sqrt[\downarrow]{u} = 2^{\left \lfloor \frac{\log u}{2} \right \rfloor}$
+    \item $high(x) = $: The high half of $x$'s bits
+    \item $low(x) = $: The low half of $x$'s bits
 \end{enumerate}
 We then have, that each element $x$ is stored in its corresponding cluster $high(x)$, except for elements that appear in $min$ and $max$ - this varies from implementation to implementation though, as some only excludes $min$ or $max$, however, I have chosen to exclude both, as this was done in our lecture.
 \\
@@ -648,22 +643,24 @@ Now that we have introduced the structure of the tree, lets run some procedures 
 \\
 \\
 Now, lets insert $6 = 0110_2$ into the tree. When doing insert we assume that the element to insert is not already in the tree. First we see, that the tree is not empty, because $min$ and $max$ are not equal to $NIL$. Then, we see, that $min < 0110_2 < max$, so we shall not swap $0110_2$ with $min$ nor $max$. Then we have $high(6) = 01_2$ and $low(6) = 10_2$. We then pass $10_2$ to cluster $01_2 = 1$. We again have that $min < 10_2 < max$, so we should not swap $10_2$ with $min$ nor $max$. Then, we have $high(10_2) = 1$ and $low(10_2) = 0$. Since cluster $1$ is empty we simply insert element $0$ and update the summary such that it contains $1$ aswell, since cluster $1$ now contains an element, resulting in the tree
+\\
+\\
 \begin{figure*}[h]
     \centering
     \includegraphics[height = 4 cm]{entities/vEB_example_2.png}
 \end{figure*}
-Now, lets find the predecessor of $4 = 0100_2$, which is the greatest element smaller than $4$, which is stored in the tree. We have $high(x) = 01_2 = 1$ and $low(x) = 00_2 = 0$. We then check if cluster $1$ is not empty and whether the minimum of cluster $1$ is less than $4$ (which would imply that the predecessor is in the cluster), which is false. We then check if the the summary is empty or if $1$ is less-than-or-equal to the minimum of the summary, which is true, since we have $01_2 \leq 01_2$. We then return the minimum of the summary, $01_2 = 1$.
+Now, lets find the predecessor of $4 = 0100_2$, which is the greatest element smaller than $4$, that is stored in the tree. We check whether the minimum of cluster $high(x) = 01_2 = 1$ is less than $low(x) = 00_2 = 0$ (which would imply that the predecessor is in the cluster), which is false. Therefore, we find the previous non-empty cluster by using the summary cluster. However, the summary tells us, that there are no non-empty previous clusters. Hence, the minimum of the tree must be predecessor of $4$ and $0001_2 = 1$ is returned.
 \\
 \\
 Now that we have performed the procedures on the example, lets find out what the worst case runtime of the procedures is. The recursive procedures that implement the operations all have running time characterized by the recurrence
 $$
-T(u) \leq T(\sqrt[\uparrow]{u}) + O(1)
+T(u) \leq T(\sqrt[\uparrow]{u}) + O(1) = T \left( 2^{\left \lceil \frac{\log u}{2} \right \rceil} \right) + O(1)
 $$
-where the $O(1)$ comes from calls to $high(x)$ and $low(x)$. If we let $m = \lg u$, we can rewrite this to
+where the $O(1)$ comes from calls to $high(x)$ and $low(x)$ and $T(\sqrt[\uparrow]{u})$ is the upperbound on the size of each node. If we let $m = \lg u$, we can rewrite this to
 $$
-T(2^m) \leq T(2^{\left \lfloor \frac{m}{2} \right \rfloor}) + O(1).
+T(2^m) \leq T(2^{\left \lceil \frac{m}{2} \right \rceil}) + O(1).
 $$
-Noting that $\lfloor m/2 \rfloor \leq 2m/3$ for all $m \geq 2$, we have
+Noting that $\lceil m/2 \rceil \leq 2m/3$ for all $m \geq 2$, we have
 $$
 T(2^m) \leq T(2^{2m/3}) + O(1).
 $$
@@ -686,9 +683,8 @@ which, by case 2 of the master method, has the solution $S(m) = O(\log m) = O(\l
     \item Introduction
     \item Introduction to various terms:
     \begin{enumerate}
-        \item \textit{Abstract problems}
         \item \textit{Encoding} 
-        \item \textit{Accepting/Rejection} and \textit{Deciding}
+        \item \textit{Accepting/Rejection} and \textit{Deciding (in polynomial time)}
         \item \textit{Verification}
         \item \textit{Reducibility}
         \item \texttt{P}, \texttt{NP} and \texttt{NPC} (and \texttt{NP-hard})
@@ -703,29 +699,26 @@ which, by case 2 of the master method, has the solution $S(m) = O(\log m) = O(\l
 Hey guys. I will be talking about NP-Completeness. I have here a disposition of the things I will go through *Hand out disposition*. As you can see, mine is identical to yours and it does not contain any information that it is not allowed to *Show own disposition*. First I will be giving this introduction, then I will be giving a brief introduction to various terms that I will be using, then I will be giving an introduction to two problems that are NP-complete, and lastly I will be proving that one of those problems is NP-complete.
 \\
 \\
-An abstract problem is a binary relation on a set $I$ of a problem \textbfit{instance} (or input) and a set of problem \textitbf{solutions} - (each instance can have multiple solutions - think of a graph with multiple shortest paths). In this topic we are only concerned with \textbfit{deicsion problems}: those having a yes/no solution. Thus, we can view an abstract decision problem as a function that maps the instance set $I$ to the solution set $\{0, 1\}$.
+First off, what is an \textitbf{encoding}? Well, an encoding is a mapping to a binary string, given an object. I will be using the notation $\langle x \rangle$ to denote the encoding of an instance $x$ of a problem.
 \\
 \\
-An \textitbf{encoding} of a set of abstract objects is a mapping to the set of binary strings. Thus, an algorithm that solves some abstract decision problem actually takes an encoding of a problem instance as input. We say that an algorithm solves a concrete problem in time $O(T(n))$ if, when it is provided a problem instance $i$ of length $n = |i|$, the algorithm can produce the solution in $O(T(n))$ time. I will be using the notation $\langle x \rangle$ to denote the encoding of an instance $x$ of a problem.
-\\
-\\
-We say that an algorithm $A$ \textbfit{accepts} a string $x \in \{0, 1\}^*$ if, given input $x$, the output of the algorithm $A(x) \in \{0, 1\}$ is $1$. The language \textbfit{accpeted} by an algorithm $A$ is thus the set of strings $L = \{x \in \{0, 1\}^* : A(x) = 1\}$.
-\\
-\\
-However, there might strings that never terminates, thus $A$ neither accepts nor rejects them. For this reason we have the term \textbfit{decide}. We say that, if additional all strings not in $L$ are rejected by $A$, that is $A(x) = 0 \text{ for all } x \in \{0, 1\}^* \backslash L$, then $L$ is \textitbf{decided} by $A$. We further say, that $L$ is \textitbf{decided by } $A$ \textbfit{ in polynomial time if } $A$ \textbfit{ decides } $L$ \textitbf{ and runs in polynomial time on all strings}. 
-\\
-\\
-We define a \textit{\textbf{verfirication algorithm}} as being a two-argument algorithm $A$, where one argument is an ordinary input string $x$ and the other is a binary string $y$ called a \textit{\textbf{certificate}}. A two-argument algorithm $A$ \textit{\textbf{verifies}} an input string $x$ if there exists a certificate $y$ such that $A(x, y) = 1$. The \textit{\textbf{language verified}} by a verification algorithm $A$ is
+We say that an algorithm $A$ \textbfit{accepts} a string $x \in \{0, 1\}^*$ if, given input $x$, the output of the algorithm $A(x)$ is $1$. Likewise, we say that the algorithm \textbfit{rejects} the string if the outfit $A(x)$ is $0$. Thus, we have the language accepted by $A$ is
 $$
-L = \{x \in \{0, 1\}^* : \text{ there exists } y \in \{0, 1\}^* \text{ such that } A(x, y) = 1\}.
+L = \{ x \in \{0, 1\}^* | A(x) = 1\}.
 $$
+\\
+\\
+However, there might strings that never terminates, thus $A$ neither accepts nor rejects them. For this reason we have the term \textbfit{decide}. We say that, if additional all strings not in $L$ are rejected by $A$, then $L$ is \textitbf{decided} by $A$. We further say, that $L$ is \textitbf{decided by } $A$ \textbfit{ in polynomial time if } $A$ \textbfit{ decides } $L$ \textitbf{ and runs in polynomial time on all strings}. 
+\\
+\\
+Now onto the  \textit{\textbf{verification algorithms}}. We define a verification algorithm as being a two-argument algorithm $A(x, y)$, one argument, $y$, is called a \textit{\textbf{certificate}}. Instead of finding a solution to $x$, $A$ instead \textitbf{verifies} that $y$ is a solution to $x$ if $A(x, y) = 1$.
 \\
 \\
 Now onto reducability, which is a method for proving that a problem is in a specific complexity class. We say that the language $L_1$ is polynomial-time \textitbf{reducible} to language $L_2$ if there is a polynomial-time computible function $f : \{0, 1\}^* \to \{0, 1\}^*$ such that for all $x \in \{0, 1\}^*$ we have
 $$
 x \in L_1 \Leftrightarrow f(x) \in L_2.
 $$
-In this case, we write $L_1 \leq_P L_2$. This means, that if $L_2 \in P$, then must $L_1$ also be in $P$, since we can just transform any instance of $L_1$ into an instance of $L_2$ in polynomial time and then solve this new instance with a polynomial-time algorithm for $L_2$.
+In this case, we write $L_1 \leq_P L_2$. This means, that $L_1$ is no harder to solve than $L_2$, since we can just transform any instance of $L_1$ into an instance of $L_2$ in polynomial time and then solve this new instance with the algorithm for $L_2$.
 \\
 \\
 We can now define the various complexity classes. The complexity class $P$ is the set of concrete decision problems that are polynomial-time solvable:
@@ -744,7 +737,7 @@ A language $L \subseteq \{0, 1\}^*$ is \textit{\textbf{NP-complete}} if
 If a language $L$ satisfies property $2$, but not necessarily property $1$, we say that $L$ is \textit{\textbf{NP-hard}}.
 \\
 \\
-Now that I have introduced the various terms, let's get onto some problems. We start off with the Ham-cycle problem. In the ham-cycle problem we are given an undirected graph $G = V, E$. The Ham-cycle problem thus asks, whether $G$ has a hamiltonian cycle - that is, a simple cycle that contains each vertex in $V$, or more precisely
+Now that I have introduced the various terms, let's get onto some problems. We start off with the Ham-cycle problem. In the ham-cycle problem we are given an undirected graph $G = (V, E)$. The Ham-cycle problem thus asks, whether $G$ has a hamiltonian cycle - that is, a simple cycle that contains each vertex in $V$, or more precisely
 $$
 HAM-CYCLE = \{\langle G \rangle : G \text{ has a hamiltonian cycle}\}.
 $$
@@ -754,7 +747,7 @@ I will not be giving a proof of this, however, this problem is NP-complete.
 Now onto the \textitbf{Traveling-salesman problem} also known as \textitbf{TSP}. In TSP we are given an complete graph $G = (V, E)$ and each edge $(i, j)$ has some cost $c(i, j) \geq 0$ assigned to it. The goal is thus to find a cycle that visits every vertex and returns back to the start vertex, which in total should be of minimal cost. The formal language for the corresponding decision problem is
 \begin{center}
     \begin{align*}
-        TSP = \{\langle G, c, k \rangle : &G = (V, E) \text{ is a complete graph} \\
+        TSP = \{\langle G, c, k \rangle : & G = (V, E) \text{ is a complete graph} \\
         &c \text{ is a function from } V \times V \to \mathbb{N} \\
         &k \in \mathbb{N}\\
         &G \text{ has a traveling-salesman tour with cost at most } k.\}
@@ -763,8 +756,13 @@ Now onto the \textitbf{Traveling-salesman problem} also known as \textitbf{TSP}.
 This problem is also NP-complete, which I will be proving now.
 \\
 \\
-We first show that TSP belongs to NP. Given an instance of the problem, we use as a certificate the sequence of $n$ vertices in the tour. The verification algorithm checks that this sequence contains each vertex exactly once, sums up the edge costs, and checks whether the sum is at most $k$, which all in all can be done in polynomial time. \\
-To prove that TSP is NP-hard, we show that $HAM-CYCLE \leq_p TSP$. Let $G = (V, E)$ be an isntance of $HAM-CYCLE$. We construct an instance of TSP as follows. We form the complete graph $G' = (V, E')$, where $E' = \{(i, j) : i, j \in V \text{ and } i \neq j\}$, and we define the cost function $c$ by
+We first show that TSP belongs to NP. Given an instance of the problem, we use as a certificate the sequence of $n$ vertices in the tour. The verification algorithm checks that this sequence contains each vertex exactly once, sums up the edge costs, and checks whether the sum is at most $k$, which all in all can be done in polynomial time. 
+\\
+\\
+To prove that TSP is NP-hard, we show that $HAM-CYCLE \leq_p TSP$, that is, we transform an instace of TSP into an instance of HAM-CYCLE, and since HAM-CYCLE is NP-complete, then TSP must also be NP-complete.
+\\
+\\
+Let $G = (V, E)$ be an instance of $HAM-CYCLE$. We construct an instance of TSP as the following. We form the complete graph $G' = (V, E')$, where $E' = \{(i, j) : i, j \in V \text{ and } i \neq j\}$, and we define the cost function $c$ by
 \begin{center}
     \begin{math}
         c(i, j) = 
@@ -774,8 +772,10 @@ To prove that TSP is NP-hard, we show that $HAM-CYCLE \leq_p TSP$. Let $G = (V, 
         \end{cases}
     \end{math}
 \end{center}
-The instance of TSP is then $\langle G', c, 0 \rangle$, which we can easily create in polynomial time. \\
-We now show that graph $G$ has a hamiltonian cycle iff $G'$ has a tour of cost at most $+$. Suppose that graph $G$ has a hamiltonian cycle $h$. each edge in $h$ belongs to $E$ and thus has cost $0$ in $G'$. Thus, $h$ is a tour in $G'$ with cost $0$. Conversely, suppose that graph $G'$ has a tour $h'$ of cost at most $0$. Since the costs of the edges in $E'$ are $0$ and $1$, the cost of tour $h'$ is exactly $0$ and each edge on the tour must have cost $0$. Therefore, $h'$ constains only edges in $E$. We conclude that $h'$ is a hamiltonian cycle in graph $G$.
+The instance of TSP is then $\langle G', c, 0 \rangle$, which we can easily create in polynomial time. 
+\\
+\\
+We now show that graph $G$ has a hamiltonian cycle iff $G'$ has a tour of cost at most $0$. Suppose that graph $G$ has a hamiltonian cycle $h$. Each edge in $h$ belongs to $E$ and thus has cost $0$ in $G'$. Thus, $h$ is a tour in $G'$ with cost $0$. Conversely, suppose that graph $G'$ has a tour $h'$ of cost at most $0$. Since the costs of the edges in $E'$ are $0$ and $1$, the cost of tour $h'$ is exactly $0$ and each edge on the tour must have cost $0$. Therefore, $h'$ contains only edges in $E$. We conclude that $h'$ is a hamiltonian cycle in graph $G$ and TSP is thus NP-complete.
 
 \clearpage
 
