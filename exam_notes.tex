@@ -801,16 +801,15 @@ Since TSP is both NP and NP-hard, it must be NP-complete.
     \item \textit{Exact exponential algorithms} vs \textit{Parameterized algorithms}
     \item \textit{Travelling salesman problem}:
     \begin{enumerate}
-        \item Introduction with example
+        \item Introduction
         \item Naive approach + running time analysis
         \item Dynamic programming - example of running + running time analysis
     \end{enumerate}
     \item \textit{Bar fight prevention problem}
     \begin{enumerate}
-        \item Introduction with example
+        \item Introduction
         \item Naive approach + running time analysis
-        \item Kernelization - example of running + running time analysis
-        \item Bounded Search tree - example of running + running time analysis
+        \item Kernelization + running time analysis
     \end{enumerate}
     \item \textit{Fixed Parameter Tractable} vs \textit{Slice-wise polynomial} problems
 \end{enumerate}
@@ -935,14 +934,10 @@ We can the brute-force the remaining graph by trying all $\binom{k^2}{k}$ subset
 Therefore, instead of using brute force to go through an enormous search space, we use simple observations to reduce the search space to a manageable size. This algorithmic technique, using reduction rules to decrease the size of the instance, is called \textit{kernelization}. The general idea is to use the parameter $k$ to quickly reduce to a smaller subproblem of the same type, whose size ideally depends only on $k$ and not on $n$.
 \\
 \\
-Thus, we have shown taht if there is a solution for a given $k$ and a given graph $G$ with $n$ vertices and $m$ edges, then we can find a kernel $H$ with at most $k^2$ vertices. Furthermore, such a kernel can be found in $O(m + n)$ time, and checking if a given subset of size at most $k$ is a solution can be done in $O(k^2)$ time. Thus, for any fixed $k$, the total running time of this algorithm is
+Thus, we have shown that if there is a solution for a given $k$ and a given graph $G$ with $n$ vertices and $m$ edges, then we can find a kernel $H$ with at most $k^2$ vertices. Furthermore, such a kernel can be found in $O(m + n)$ time, and checking if a given subset of size at most $k$ is a solution can be done in $O(k^2)$ time. Thus, for any fixed $k$, the total running time of this algorithm is
 $$
 O(m + n + \binom{k^2}{k} k^2).
 $$
-This can be improved further by using a Bounded Search Tree. The important observation here is, that for each edge $(u, v) \in E$, at least one of $u, v$ must be rejected. The idea is then to pick an arbitrary edge $(u, v)$, reject $u$ and run the algorithm recursively to check whether the remaining conflicts can be resolved by rejecting at most $k - 1$ guests. If this succeeds you already have a solution. If it fails, then move $u$ back into the undecided list, move $v$ to the reject list and run the algorithm recursively to check whether the remaining conflicts can be resolved by tejecting at most $k - $ additional guests. If this recursive call also fails to find a solution, then you can be sure that there is no way to avoid a fight by rejecting at most $k$ guests.
-\\
-\\
-This procedure results in a recursion tree of depth $k$, thus there is a total of $2^k$ recursive calls. If we start by rejecting all vertices of degree $d(v) \geq k + 1$, the resulting graph has at most $|E| = \frac{1}{2} \sum_{v \in V} d(v) \leq \frac{1}{2} nk$ edges, so constructing each recursive call can be done in $O(nk)$ time. The total running time is then $O(m + nk \cdot 2^k)$.
 \\
 \\
 An important feature of the Bar Fight Prevention problem is the existence of the parameter $k$. The problem of finding the minimum $k$ that works is NP-complete, but for any fixed constant $k$ we have just seen two linear-time algorithms. We say the problem is \textit{parameterized by the parameter k}.
