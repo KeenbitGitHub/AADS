@@ -699,7 +699,7 @@ which, by case 2 of the master method, has the solution $S(m) = O(\log m) = O(\l
 Hey guys. I will be talking about NP-Completeness. I have here a disposition of the things I will go through *Hand out disposition*. As you can see, mine is identical to yours and it does not contain any information that it is not allowed to *Show own disposition*. First I will be giving this introduction, then I will be giving a brief introduction to various terms that I will be using, then I will be giving an introduction to two problems that are NP-complete, and lastly I will be proving that one of those problems is NP-complete.
 \\
 \\
-First off, what is an \textitbf{encoding}? Well, an encoding is a mapping to a binary string, given an object. I will be using the notation $\langle x \rangle$ to denote the encoding of an instance $x$ of a problem.
+The way we encode the data can have a huge impact on the runtime of the algorithms. We will in the following assume, that an encoding is a mapping to a binary string. I will be using the notation $\langle x \rangle$ to denote the encoding of an instance $x$ of a problem.
 \\
 \\
 We say that an algorithm $A$ \textbfit{accepts} a string $x \in \{0, 1\}^*$ if, given input $x$, the output of the algorithm $A(x)$ is $1$. Likewise, we say that the algorithm \textbfit{rejects} the string if the outfit $A(x)$ is $0$. Thus, we have the language accepted by $A$ is
@@ -762,7 +762,7 @@ We first show that TSP belongs to NP. Given an instance of the problem, we use a
 To prove that TSP is NP-hard, we show that $HAM-CYCLE \leq_p TSP$, that is, we transform an instace of TSP into an instance of HAM-CYCLE, and since HAM-CYCLE is NP-complete, then TSP must also be NP-complete.
 \\
 \\
-Let $G = (V, E)$ be an instance of $HAM-CYCLE$. We construct an instance of TSP as the following. We form the complete graph $G' = (V, E')$, where $E' = \{(i, j) : i, j \in V \text{ and } i \neq j\}$, and we define the cost function $c$ by
+Let $G = (V, E)$ be a graph of $HAM-CYCLE$. We construct an instance of TSP as the following. We form the complete graph $G' = (V, E')$, where $E' = \{(i, j) : i, j \in V \text{ and } i \neq j\}$, and we define the cost function $c$ by
 \begin{center}
     \begin{math}
         c(i, j) = 
@@ -775,7 +775,17 @@ Let $G = (V, E)$ be an instance of $HAM-CYCLE$. We construct an instance of TSP 
 The instance of TSP is then $\langle G', c, 0 \rangle$, which we can easily create in polynomial time. 
 \\
 \\
-We now show that graph $G$ has a hamiltonian cycle iff $G'$ has a tour of cost at most $0$. Suppose that graph $G$ has a hamiltonian cycle $h$. Each edge in $h$ belongs to $E$ and thus has cost $0$ in $G'$. Thus, $h$ is a tour in $G'$ with cost $0$. Conversely, suppose that graph $G'$ has a tour $h'$ of cost at most $0$. Since the costs of the edges in $E'$ are $0$ and $1$, the cost of tour $h'$ is exactly $0$ and each edge on the tour must have cost $0$. Therefore, $h'$ contains only edges in $E$. We conclude that $h'$ is a hamiltonian cycle in graph $G$ and TSP is thus NP-complete.
+We now show that 
+$$
+G \text{ has a hamiltonian cycle} \Leftrightarrow G' \text{ has a tour of cost at most } 0
+$$
+We start with the $\Rightarrow$-part. Suppose that $G$ has a hamiltonian cycle $h$. Each edge in $h$ belongs to $E$ and thus has cost $0$ in $G'$. Thus, $h$ is a tour in $G'$ with cost $0$.
+\\
+\\
+Now onto the $\Leftarrow$-part. Suppose that $G'$ has a tour $h'$ of cost at most $0$. Since the costs of the edges in $E'$ are $0$ and $1$, the cost of tour $h'$ is exactly $0$ and each edge on the tour must have cost $0$. Therefore, $h'$ contains only edges in $E$. We conclude that $h'$ is a hamiltonian cycle in graph $G$ and TSP is thus NP-hard.
+\\
+\\
+Since TSP is both NP and NP-hard, it must be NP-complete.
 
 \clearpage
 
