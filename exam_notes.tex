@@ -798,12 +798,12 @@ Since TSP is both NP and NP-hard, it must be NP-complete.
 \subsection*{Disposition}
 \begin{enumerate}
     \item Introduction
-    \item \textit{Exact exponential algorithms} vs \textit{Parameterized algorithms}
+    \item \textit{Exact exponential algorithms} vs \textit{Parameterized algorithms} (vs \textit{approximation algorithms})
     \item \textit{Travelling salesman problem}:
     \begin{enumerate}
         \item Introduction
         \item Naive approach + running time analysis
-        \item Dynamic programming - example of running + running time analysis
+        \item Dynamic programming + running time analysis
     \end{enumerate}
     \item \textit{Bar fight prevention problem}
     \begin{enumerate}
@@ -813,25 +813,6 @@ Since TSP is both NP and NP-hard, it must be NP-complete.
     \end{enumerate}
     \item \textit{Fixed Parameter Tractable} vs \textit{Slice-wise polynomial} problems
 \end{enumerate}
-\begin{figure}[h]
-    \centering
-    \includegraphics[width = 5 cm]{entities/TSP_example.png}
-\end{figure}
-\begin{center}
-    \begin{math}
-        c = 
-        \begin{blockarray}{cccccc}
-              & \text{T} & \text{o} &   & & \\
-            1 & 2 & 3 & 4 & &  \\
-            \begin{block}{[cccc]cc}
-                0 & 10 & 15 & 20 & 1 & \text{F} \\
-                5 & 0 & 9 & 10 & 2 & \text{r} \\
-                6 & 13 & 0 & 12 & 3 & \text{o} \\
-                8 & 8 & 9 & 0 & 4 & \text{m} \\
-            \end{block}
-        \end{blockarray}
-    \end{math}
-\end{center}
 
 \clearpage
 \subsection*{Presentation}
@@ -862,54 +843,11 @@ is the length of the minimal tour. Thus, we have
         \end{cases}
     \end{math}
 \end{center}
-Now that I have introduced the problem and how to solve the problem using dynamic programming, let's have a look at the example *Write example on blackboard*.
-First we start at the bottom of the recursion tree. Thus, for each vertex that is not $1$, we find the cost of traveling to $1$. In the following $OPT(a, b)$ means, that we are currently at vertex $a$, and we have not visited the vertices in the set $b$. Thus, we have
+What is the running time of this algorithm? The number of path lengths computed is something along the lines of
 $$
-OPT(2, Ø) = 5
+\sum_{j = 2} ^{n - 1} \binom{n - 1}{j} \sum_{i = 1} ^j (j - 1) \leq n^2 \sum_{j = 1} ^n \binom{n}{j} = n^2 \cdot 2^n.
 $$
-$$
-Opt(3, Ø) = 6
-$$
-$$
-OPT(4, Ø) = 8
-$$
-Now, we just use these to move up the recursion tree, resulting in
-$$
-OPT(2, \{3\}) = OPT(3, Ø) + c(2, 3) = 6 + 9 = 15
-$$
-$$
-OPT(2, \{4\}) = OPT(4, Ø) + c(2, 4) = 8 + 10 = 18
-$$
-$$
-OPT(3, \{2\}) = OPT(2, Ø) + c(3, 2) = 5 + 13 = 18
-$$
-$$
-OPT(3, \{4\}) = OPT(4, Ø) + c(3, 4) = 8 + 12 = 20
-$$
-$$
-OPT(4, \{2\}) =  OPT(2, Ø) + c(4, 2) = 5 + 8 = 13
-$$
-$$
-OPT(4, \{3\}) = OPT(3, Ø) + c(4, 3) = 6 + 9 = 15.
-$$
-From now on, we actually need to use the $\min$-function, as we have multiple paths that we can take.
-$$
-OPT(2, \{3, 4\}) = \min \{OPT(3, \{4\} + c(2, 3), OPT(4, \{3\} + c(2, 4)\} = \min\{20 + 9, 15 + 10 \} = 25
-$$
-$$
-OPT(3, \{2, 4\}) = \min \{OPT(2, \{4\} + c(3, 2), OPT(4, \{2\} + c(3, 4) \} = \min\{18 + 13, 13 + 12\} = 25
-$$
-$$
-OPT(4, \{2, 3\}) = \min \{OPT(2, \{3\} + c(4, 2), OPT(3, \{2\} + c(4, 3)\} = \min\{15 + 8, 18 + 9\} = 23
-$$
-Lastly, we have
-$$
-OPT(1, \{2, 3, 4\}) = \min\{OPT(2, \{4, 3\} + c(1, 2), OPT(3, \{2, 4\}) + c(1, 3), OPT(4, \{2, 3\} + c(1, 4)\}
-$$
-$$
-= \min\{25 + 10, 25 + 15, 23 + 20\} = 35.
-$$
-Now, we need to find the path that actually leads to this. To do so, we just simply follow the elements, that meet the $\min$'s. By doing so we find the path $(1, 2, 4, 3)$. This algorithm using dynamic programming has a runtime of $O(n^2 \cdot 2^n)$, which is far better than the previous algorithm's runtime of $O(n!)$. 
+The algorithm thus has a running time of $O(n^2 \cdot 2^n)$ if we assume additions take at most polynomial time in $n$, which is far better than the previous algorithm's runtime of $O(n!)$. 
 \\
 \\
 Now, let's get into the \textbfit{Bar fight prevention problem}, which we will be solving using a parameterized algorithm. In the Bar fight prevention problem, a bouncer has to block at most $k$ of $n$ people at the door to prevent fights. The problems then asks who should be blocked such that this is possible?
@@ -926,7 +864,7 @@ First off, let's let $d(v)$ for all $v \in V$ be the degree of $v$, let $k$ be a
 \end{enumerate}
 By doing this we end up with $|V| \leq k^2$, because
 $$
-|V| = \sum_{v \in V} 1 = \frac{1}{2} \sum_{v \in V} 2 \leq \frac{1}{2} d(v) \leq k^2.
+|V| = \sum_{v \in V} 1 = \frac{1}{2} \sum_{v \in V} 2 \leq \frac{1}{2} \sum_{v \in V} d(v) \leq k^2.
 $$
 We can the brute-force the remaining graph by trying all $\binom{k^2}{k}$ subsets of $k$ people.
 \\
@@ -938,8 +876,6 @@ Thus, we have shown that if there is a solution for a given $k$ and a given grap
 $$
 O(m + n + \binom{k^2}{k} k^2).
 $$
-\\
-\\
 An important feature of the Bar Fight Prevention problem is the existence of the parameter $k$. The problem of finding the minimum $k$ that works is NP-complete, but for any fixed constant $k$ we have just seen two linear-time algorithms. We say the problem is \textit{parameterized by the parameter k}.
 \\
 \\
@@ -960,11 +896,13 @@ A parameterized problem is \textit{Slice-wise Polynomial (XP)} if it has an algo
     \item The Vertex-cover problem
     \begin{enumerate}
         \item Introduction
+        \item Introduction to \texttt{APPROX-VERTEX-COVER} with example
         \item Proof that \texttt{APPROX-VERTEX-COVER} is a 2-approximation algorithm
     \end{enumerate}
     \item MAX-3-CNF
     \begin{enumerate}
         \item Introduction
+        \item Introduction to the randomized algorithm for \texttt{MAX-3-CNF}
         \item Proof that the randomized algorithm for \texttt{MAX-3-CNF} is a randomized $8/7$-approximation algorithm
     \end{enumerate}
 \end{enumerate}
@@ -991,32 +929,45 @@ $$
 We call a randomized algorithm that achieves an approximation ratio of $\rho(n)$ a \textit{\textbf{randomized $\rho(n)$-approximation algorithm}}
 \\
 \\
-Now that I have introduced some basic terms, let's get into the examples. Let's start with the \textitbf{vertex cover problem}. A \textitbf{vertex cover} of an unidrected graph $G = (V, E)$ is a subset $V' \subseteq V$, such that if $(u, v)$ is an edge of $G$, then either $u \in V'$ or $v \in V'$ (or both). The goal of the vertex cover problem is thus to find a vertex cover of minimum size in a given undirected graph. Finding such a graph is NP-complete, however, we can use an approximation algortihm to find a vertex cover whose size is no more than twice the size of the optimal vertex cover, using a running time of $O(V + E)$, using adjacency lists to represent $E$. The algorithm works by continuously picking an arbitrary edge $(u, v)$, saving $u$ and $v$ in a set $C$, and removing $(u, v)$ and all other edges incident on either $u$ or $v$ from $G$. This is done untill $G$ has no edges left.
+Now that I have introduced some basic terms, let's get into the examples. Let's start with the \textitbf{vertex cover problem}. A \textitbf{vertex cover} of an unidrected graph $G = (V, E)$ is a subset $V' \subseteq V$, such that if $(u, v)$ is an edge of $G$, then either $u \in V'$ or $v \in V'$ (or both). The goal of the vertex cover problem is thus to find a vertex cover of minimum size in a given undirected graph. 
 \\
 \\
-Let's look at an example of this
-% SHOW EXAMPLE
+Finding such a graph is NP-complete, however, we can use an approximation algortihm to find a vertex cover whose size is no more than twice the size of the optimal vertex cover, with a running time of $O(V + E)$, using adjacency lists to represent $E$. The algorithm works by continuously picking an arbitrary edge $(u, v)$, saving $u$ and $v$ in a set $C$, and removing $(u, v)$ and all other edges incident on either $u$ or $v$ from $G$. This is done untill $G$ has no edges left, where $C$ is returned *Do this while performing the algorithm on the following example*.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width = 6 cm]{entities/vertex_cover_approx.png}
+\end{figure}
 \\
 \\
 Now that we have the algorithm introduced, let's prove, that the returned vertex cover is at most twice at big as the optimal vertex cover. 
 \\
 \\
-The set $C$ of vertices that is returned by the algorithm is a vertex cover, since the algorithm loops until every edge in $E$ has been covered by some vertex in $C$. To see that the algorithm returns a vertex cover that is at most twice the size of an optimal cover, let $A$ denote the set of edges that are picked. In order to cover the edges in $A$, the optimal cover $C^*$ must include at least one endpoint of each edge in $A$. No two edges in $A$ share an endpoint, since once an edge is picked all other edges that are incident on it sendpoints are deleted from $E$. Thus, no two edges in $A$ are covered by the same vertex from $C^*$, and we have
+We start off by letting $A$ denote the set of edges that are picked in the approximation algorithm, $C^*$ be the optimal cover, and $C$ be the cover returned by the approximation algorithm. 
+\\
+\\
+We know that $C$ is a vertex cover, since the algorithm loops until every edge in $E$ has been covered by some vertex in $C$.
+\\
+\\
+We have
 $$
-|C^*| \geq |A|.
+|C^*| \geq |A|,
 $$
-Each iteration picks an edge for which neither of its endpoints is already in $C$, yielding an exact upper bound on the size of the vertex cover returned
+since no two edges in $A$ share an endpoints and thus no two edges in $A$ are covered by the same vertex from $C^*$. We also have
 $$
-|C| = 2|A|.
+|C| = 2|A|,
 $$
-Thus, we have
+since $A$ consists of the edge between two vertices in $C$ and all of the elements in $C$ are unique. Thus, we have
 $$
 |C| = 2|A| \leq 2|C^*|.
 $$
 Thus, we have, that the algorithm is a $2$-approximation algorithm.
 \\
 \\
-Now that we have solved a problem using a non-random approximation algorithm, let's instead solve a problem using a random approximation algorithm. The problem we will solve is the \textitbf{MAX-3-CNF satisfiability problem}. Let me start off by explaining the problem. In 3-CNF-SAT, we are asked whether a given boolean formula in 3-CNF is satisfiable. We say that a boolean formula is in \textitbf{3-CNF} if it is expressed as an AND of clauses, each of which is the OR of one or more literals, where each clause has exactly three distinct literals and a \textitbf{literal} is a variable or its negation. For the boolean formula to be satisfiable, there must exist an assignment of the variables so that every clause evaluates to $1$, which is NP-complete. In the approximation problem \textitbf{MAX-3-CNF satisfiability}, we instead wish to find an assignment of the variables that satisfies as many clauses as possible. The input to MAX-3-CNF satisfiability is thus a boolean formula of $n$ variables and $m$ clauses, and the goal is goal is to return an assignment of the variables that maximizes the number of clauses evaluating to $1$.
+Now that we have solved a problem using a non-random approximation algorithm, let's instead solve a problem using a random approximation algorithm. The problem we will solve is the \textitbf{MAX-3-CNF satisfiability problem}. Let me start off by explaining the problem. In 3-CNF-SAT, we are asked whether a given boolean formula in 3-CNF is satisfiable. We say that a boolean formula is in \textitbf{3-CNF} if it is expressed as an AND of clauses, each of which is the OR of exactly three distinct literals and a \textitbf{literal} is a variable or its negation. For instance,
+$$
+(x_1 \vee \neg x_2 \vee \neg x_1) \wedge (x_3 \vee x_4 \vee \neg x_1).
+$$
+For the boolean formula to be satisfiable, there must exist an assignment of the variables so that every clause evaluates to $1$, which is NP-complete. In the approximation problem \textitbf{MAX-3-CNF satisfiability}, we instead wish to find an assignment of the variables that satisfies as many clauses as possible. The input to MAX-3-CNF satisfiability is thus a boolean formula of $n$ variables and $m$ clauses, and the goal is goal is to return an assignment of the variables that maximizes the number of clauses evaluating to $1$.
 \\
 \\
 To solve this problem by randomly setting each variable to $1$ with probability $1/2$ and to $0$ with probability $1/2$, which yields a randomized $8/7$-approximation algorithm. We require each clause to consist of exactly three distinct literals, and we assume that no clause contains both a variable and its negation. I will now prove, that this randomized algorithm is a randomized $8/7$-approximation algorithm.
@@ -1056,6 +1007,11 @@ We thus have, that the approximation algorithm is a $8/7$-approximation algorith
         \item Example on running the algorithm
     \end{enumerate}
 \end{enumerate}
+\begin{figure*}[h]
+    \centering
+    \includegraphics[width = 6 cm]{entities/polygon_example.png}
+\end{figure*}
+
 
 \clearpage
 \subsection*{Presentation}
@@ -1117,7 +1073,7 @@ Now, we should triangulize the polygon. However, due to time limits I will only 
     \centering
     \includegraphics[width = 6 cm]{entities/polygon_final.png}
 \end{figure*}
-We thus have $4$ red nodes, $2$ yellow nodes and $2$ green nodes. Thus, optimal solution for this pieces would be to place cameras at each othe yellow nodes or at each of the green nodes.
+We thus have $4$ red nodes, $2$ yellow nodes and $2$ green nodes. Thus, optimal solution for this pieces would be to place cameras at each of the yellow nodes or at each of the green nodes.
 
 \clearpage
 
