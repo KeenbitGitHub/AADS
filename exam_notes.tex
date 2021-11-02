@@ -79,21 +79,7 @@ To solve this problem we use a \textitbf{residual network}, which keeps track of
 to each of the edges in $G$.
 \\
 \\
-To solve this problem one can make use of the Ford-Fulkeson method. It iteratively increases the value of the flow. We start with $f(u, v) = 0$ for all $u, v \in V$. At each iteration, we increase the flow value in $G$ by finding an augmenting path in an associated \textbfit{residual network} $G_f$. Once we know the edges of an augmenting path $p$ in $G_f$, we can define the \textit{\textbf{residual capacity}} of the path $p$ by
-$$
-c_f(p) = \min \{c_f(u, v) : (u, v) \text{ is on } p\}
-$$
-and the flow $f_p : V \times V \to \mathbb{R}$ in $G_f$ by
-\begin{center}
-    \begin{math}
-        f_p(u, v) = 
-        \begin{cases}
-            c_f(p) & \text{if } (u, v) \in p \\
-            0 & \text{otherwise}.
-        \end{cases}
-    \end{math}
-\end{center}
-We can then use this to augment the flow $f$ by $f_p$ to get closer to maximum, by
+To solve this problem one can make use of the Ford-Fulkeson method. It iteratively increases the value of the flow. We start with $f(u, v) = 0$ for all $u, v \in V$. At each iteration, we increase the flow value in $G$ by finding an augmenting path in an associated \textbfit{residual network} $G_f$. Once we know the edges of an augmenting path $p$ in $G_f$ we can take the minimum capacity of the augmenting path and turn that into a flow $f_p$. We can then use this to augment the flow $f$ by $f_p$ to get closer to maximum, by
 \begin{center}
     \begin{math}
         (f \uparrow f_p)(u, v) = 
@@ -128,7 +114,7 @@ Now, let's prove that the second case implies the third case:
     $$
     S = \{v \in V : \text{ there exists a path from } s \text{ to } v \text{ in } G_f\}
     $$
-    and $T = V - S$. The partition $(S, T)$ is then a cut. Now, consider a pair of vertices $u \in S$ and $v \in T$. If $(u, v) \in E$, we must have $f(u, v) = c(u, v)$. If $(v, u) \in E$, we must have $f(v, u) = 0$. If neither $(u, v)$ nor $(v, u)$ is in $E$, then $f(u, v) = f(v, u) = 0$. We thus have
+    and $T = V - S$. The partition $(S, T)$ is then a cut. Now, consider a pair of vertices $u \in S$ and $v \in T$. \textcolor{red}{If $(u, v) \in E$, we must have $f(u, v) = c(u, v)$. If $(v, u) \in E$, we must have $f(v, u) = 0$}. If neither $(u, v)$ nor $(v, u)$ is in $E$, then $f(u, v) = f(v, u) = 0$. We thus have
     \begin{align*}
         f(S, T) &= \sum_{u \in S} \sum_{v \in t} f(u, v) - \sum_{u \in S} \sum_{v \in t} f(v, u) \\
         &= \sum_{u \in S} \sum_{v \in T} c(u, v) - \sum_{u \in S} \sum_{v \in T} 0 \\
@@ -142,6 +128,20 @@ Lastly, let's prove that the third case implies the first case:
 \end{quote}
 
 \section*{Extra}
+We have
+$$
+c_f(p) = \min \{c_f(u, v) : (u, v) \text{ is on } p\}
+$$
+and
+\begin{center}
+    \begin{math}
+        f_p(u, v) = 
+        \begin{cases}
+            c_f(p) & \text{if } (u, v) \in p \\
+            0 & \text{otherwise}.
+        \end{cases}
+    \end{math}
+\end{center}
 A cut $(S, T)$ is a partition of $V$ into $S$ and $T = V - S$, such that $s \in S$ and $t \in T$. The capacity of the cut $c(S, T)$ is then just simply the sum of the capacities of the edges going across the cut from $S$ to $T$
 $$
 c(S, T) = \sum_{u \in S} \sum_{v \in T} c(u, v),
@@ -183,8 +183,9 @@ We can improve the bound on Ford-Fulkerson by finding the augmenting path with a
 \subsection*{Program}
 \begin{enumerate}
     \item Introduction
-    \item Introduction to
+    \item Introduction to LP:
     \begin{itemize}
+        \item Motivation behind LP
         \item Various forms of LP
         \item \textit{Objective function}
         \item \textit{Constraints}
@@ -196,7 +197,6 @@ We can improve the bound on Ford-Fulkerson by finding the augmenting path with a
         \item Motivation behind duality
         \item Definition of \textit{dual linear program}
         \item Definition of \textit{weak duality}
-        \item Proof of weak duality
     \end{itemize}
 \end{enumerate}
 \begin{center}
@@ -305,7 +305,7 @@ Thus, the linear program is now in slack form and we can perform the SIMPLEX alg
         $x_6 = 4 - x_1 + 2x_2 - x_3$
     \end{tabular}
 \end{center}
-We see, that $x_1$ and $x_2$ are the only variables that can increase the value of the objective function. We choose $x_2$ as the pivot element (\textbf{DETTE ER VIGTIGT FOR AT FÅ ALGORTIMEN TIL AT TERMINERE EFTER 1 ITERATION - ALT ANDET VIL FÅ DEN TIL AT KØRE LÆNGERE}). Next, we isolate $x_2$ in $x_4$, since $x_4$ is the only constraint with a negative coefficient for $x_2$. The value of $x_2$ is then inserted in the other constraints as well as the objective function, resulting in
+We see, that $x_1$ and $x_2$ are the only variables that can increase the value of the objective function. We choose $x_2$ as the pivot element (\textbf{DETTE ER VIGTIGT FOR AT FÅ ALGORTIMEN TIL AT TERMINERE EFTER 1 ITERATION - ALT ANDET VIL FÅ DEN TIL AT KØRE LÆNGERE. DET ER OGSÅ VIGTIGT, AT DEN UDSKIFTES HVOR $6$ ER POSITIV OG IKKE I DEN MODSATTE.}). Next, we isolate $x_2$ in $x_4$, since $x_4$ is the only constraint with a negative coefficient for $x_2$. The value of $x_2$ is then inserted in the other constraints as well as the objective function, resulting in
 \begin{center}
     \begin{tabular}{l}
         $z = 12 - x_1 - 2x_4$ \\
@@ -380,7 +380,6 @@ $$
     \centering
     \includegraphics[width = 4 cm]{entities/min-cut_example.PNG}
 \end{figure*}
-\textbf{NOTE: MÅSKE UDSKIFT LV vs MC MED BEVIS AF MIN-CUT's KØRETID?!?!?}
 
 \clearpage
 \subsection*{Presentation}
@@ -451,7 +450,7 @@ By running this algorithm on the example we potentially get the following
     \centering
     \includegraphics{entities/min_cut_example_performance.PNG}
 \end{figure*}
-Thus, the edges $4$ and $4'$ is a min-cut.
+Thus, the edges $4$ and $4'$ is a min-cut, which is correct, however, the algorithm might not always return the correct output, as it has a probability of $\frac{2}{n(n - 1)}$ of returning a specific min-cut, where $n$ is the amount of vertices in the graph.
 \\
 \\
 Lastly, let us talk about Las Vegas and Monte Carlo algorithms. A Las Vegas algorithm is a randomized algorithm that always return the correct output, and the randomness lies in its running time. A Monte Carlo algorithm on the other hand is a randomized algorithm that does not necessarily return a correct output, however, we can run it multiple times to get a correct output.
@@ -750,16 +749,16 @@ Now onto the \textitbf{Traveling-salesman problem} also known as \textitbf{TSP}.
         TSP = \{\langle G, c, k \rangle : & G = (V, E) \text{ is a complete graph} \\
         &c \text{ is a function from } V \times V \to \mathbb{N} \\
         &k \in \mathbb{N}\\
-        &G \text{ has a traveling-salesman tour with cost at most } k.\}
+        &G \textcolor{red}{\text{ has a traveling-salesman tour with cost at most } k.}\}
     \end{align*}
 \end{center}
 This problem is also NP-complete, which I will be proving now.
 \\
 \\
-We first show that TSP belongs to NP. Given an instance of the problem, we use as a certificate the sequence of $n$ vertices in the tour. The verification algorithm checks that this sequence contains each vertex exactly once, sums up the edge costs, and checks whether the sum is at most $k$, which all in all can be done in polynomial time. 
+\textcolor{red}{We first show that TSP belongs to NP. Given an instance of the problem, we use as a certificate the sequence of $n$ vertices in the tour. The verification algorithm checks that this sequence contains each vertex exactly once, sums up the edge costs, and checks whether the sum is at most $k$, which all in all can be done in polynomial time.}
 \\
 \\
-To prove that TSP is NP-hard, we show that $HAM-CYCLE \leq_p TSP$, that is, we transform an instace of TSP into an instance of HAM-CYCLE, and since HAM-CYCLE is NP-complete, then TSP must also be NP-complete.
+\textcolor{red}{To prove that TSP is NP-hard, we show that $HAM-CYCLE \leq_p TSP$, that is, we transform an instace of TSP into an instance of HAM-CYCLE, and since HAM-CYCLE is NP-complete, then TSP must also be NP-complete.}
 \\
 \\
 Let $G = (V, E)$ be a graph of $HAM-CYCLE$. We construct an instance of TSP as the following. We form the complete graph $G' = (V, E')$, where $E' = \{(i, j) : i, j \in V \text{ and } i \neq j\}$, and we define the cost function $c$ by
@@ -956,7 +955,7 @@ since no two edges in $A$ share an endpoints and thus no two edges in $A$ are co
 $$
 |C| = 2|A|,
 $$
-since $A$ consists of the edge between two vertices in $C$ and all of the elements in $C$ are unique. Thus, we have
+\textcolor{red}{since each iteration picks an edge for which neither of its endpoints are already in $C$}. Thus, we have
 $$
 |C| = 2|A| \leq 2|C^*|.
 $$
